@@ -6,21 +6,48 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
-import {ongoingJobs} from '../data';
+import React, {useRef, useState, useCallback, useEffect} from 'react';
+import {
+  getInitials,
+  convertTimetoTimeHour,
+  capitalizeWords,
+} from '../helper/customMethods'
+import moment from 'moment';
 import {SIZES, COLORS, scaleFont, scaleByWidth} from '../constants';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {useTheme} from '../theme/ThemeProvider';
 import Button from '../components/Button';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native';
 import ButtonFilled from '../components/ButtonFilled';
-import {getInitials} from '../helper/customMethods';
+import {GetData} from '../helper/CommonHelper';
+import Settings from '../config/settings';
 
 const CancelJobs = () => {
-  const [jobs, setJobs] = useState(ongoingJobs);
+  const [cancelJobData, setCancelJobData] = useState<any>([]);
   const refRBSheet = useRef<any>(null);
   const {dark} = useTheme();
   const navigation = useNavigation<NavigationProp<any>>();
+
+  const fetchCancelJobs = async () => {
+    let jobs = await GetData(`${Settings.endpoints.get_jobs_list}?status=3`);
+    if (jobs?.data.length > 0) {
+      setCancelJobData(jobs?.data);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCancelJobs();
+    }, []),
+  );
+
+  useEffect(() => {
+    fetchCancelJobs();
+  }, []);
 
   return (
     <View
@@ -31,103 +58,122 @@ const CancelJobs = () => {
         },
       ]}>
       <FlatList
-        data={jobs}
+        data={cancelJobData}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({item}) => (
           <TouchableOpacity
-            style={[
-              styles.cardContainer,
-              {
-                backgroundColor: dark ? COLORS.dark2 : COLORS.white,
-              },
-            ]}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('productreviews')}
-              style={styles.detailsContainer}>
-              {/* <View>
-                 <ProfileAvatorView
-                  name={getInitials(item.name)}
-                 />
-                 
-              </View> */}
-              <View>
+          style={[
+            styles.cardContainer,
+            {
+              backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+            },
+          ]}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('productreviews')}
+            style={styles.detailsContainer}>
+            {/* <View>
+               <ProfileAvatorView
+                name={getInitials(item.name)}
+               />
+               
+            </View> */}
+            <View>
+              <View
+                style={[
+                  styles.productImageContainer,
+                  {
+                    backgroundColor: dark ? COLORS.dark3 : COLORS.silver,
+                  },
+                ]}>
                 <View
                   style={[
-                    styles.productImageContainer,
-                    {
-                      backgroundColor: dark ? COLORS.dark3 : COLORS.silver,
-                    },
+                    styles.productImage,
+                    {backgroundColor: dark ? COLORS.white : COLORS.black},
                   ]}>
-                  <View
+                  <Text
                     style={[
-                      styles.productImage,
-                      {backgroundColor: dark ? COLORS.white : COLORS.black},
+                      {
+                        justifyContent: 'center',
+                        fontSize: 25,
+                        fontWeight: '700',
+                        alignItems: 'center',
+                      },
+                      {color: dark ? COLORS.black : COLORS.white},
                     ]}>
-                    <Text
-                      style={[
-                        {
-                          justifyContent: 'center',
-                          fontSize: 25,
-                          fontWeight: '700',
-                          alignItems: 'center',
-                        },
-                        {color: dark ? COLORS.black : COLORS.white},
-                      ]}>
-                      {getInitials(item.name)}
-                    </Text>
-                  </View>
-                  {/* < Image
-                    source={item.image}
-                    resizeMode='cover'
-                    style={styles.productImage}
-                  /> */}
+                    {getInitials(item?.customer?.full_name)}
+                  </Text>
                 </View>
-                {/* <View style={styles.reviewContainer}>
-                  <FontAwesome name="star" size={12} color="orange" />
-                  <Text style={styles.rating}>{item.rating}</Text>
-                </View> */}
+                {/* < Image
+                  source={item.image}
+                  resizeMode='cover'
+                  style={styles.productImage}
+                /> */}
               </View>
-              <View style={styles.detailsRightContainer}>
-                <Text
-                  style={[
-                    styles.name,
-                    {
-                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
-                    },
-                  ]}>
-                  {item.name}
-                </Text>
-                <Text
-                  style={[
-                    styles.address,
-                    {
-                      color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
-                    },
-                  ]}>
-                  {item.address}
-                </Text>
-                <Text
-                  style={[
-                    styles.name,
-                    {
-                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
-                    },
-                  ]}>
-                  {'Job Name'}
-                </Text>
-                <View style={styles.priceContainer}>
-                  <View style={styles.priceItemContainer}>
-                    <Text
-                      style={[
-                        styles.totalPrice,
-                        {
-                          color: dark ? COLORS.white : COLORS.primary,
-                        },
-                      ]}>
-                      £{item.price}
-                    </Text>
-                  </View>
+              {/* <View style={styles.reviewContainer}>
+                <FontAwesome name="star" size={12} color="orange" />
+                <Text style={styles.rating}>{item.rating}</Text>
+              </View> */}
+            </View>
+            <View style={styles.detailsRightContainer}>
+              <Text
+                style={[
+                  styles.name,
+                  {
+                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                  },
+                ]}>
+                {item?.customer?.full_name}
+              </Text>
+              <Text
+                style={[
+                  styles.address,
+                  {
+                    color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
+                  },
+                ]}>
+                {item?.property?.address_line_1
+                  ? `${capitalizeWords(item?.property?.address_line_1)}${
+                      item?.property?.address_line_2
+                        ? ', ' +
+                          capitalizeWords(item?.property?.address_line_2)
+                        : ''
+                    }${
+                      item?.property?.city
+                        ? ', ' + capitalizeWords(item?.property?.city)
+                        : ''
+                    }${
+                      item?.property?.postal_code
+                        ? ', ' + item?.property?.postal_code
+                        : ''
+                    }`
+                  : 'N/A'}
+              </Text>
+              <Text
+                style={[
+                  styles.name,
+                  {
+                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                  },
+                ]}>
+                {item?.description}
+              </Text>
+              <View style={styles.priceContainer}>
+                <View style={styles.priceItemContainer}>
+                  <Text
+                    style={[
+                      styles.totalPrice,
+                      {
+                        color: dark ? COLORS.white : COLORS.primary,
+                      },
+                    ]}>
+                    £
+                    {item?.estimated_amount
+                      ? item.estimated_amount.toFixed(2)
+                      : '0.00'}
+                  </Text>
+                </View>
+                {item?.calendar?.date ? (
                   <View
                     style={[
                       styles.dataViewContainer,
@@ -143,9 +189,13 @@ const CancelJobs = () => {
                           color: dark ? COLORS.white : COLORS.primary,
                         },
                       ]}>
-                      {'1st December 2025'}
+                      {moment(item?.calendar?.date, 'DD-MM-YYYY').format(
+                        'Do MMMM YYYY',
+                      )}
                     </Text>
                   </View>
+                ) : null}
+                {item?.calendar?.slot?.start ? (
                   <View
                     style={[
                       styles.statusContainer,
@@ -161,12 +211,13 @@ const CancelJobs = () => {
                           color: dark ? COLORS.white : COLORS.primary,
                         },
                       ]}>
-                      {'11:00'}
+                      {convertTimetoTimeHour(item?.calendar?.slot?.start)}
                     </Text>
                   </View>
-                </View>
+                ) : null}
               </View>
-            </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
             <View
               style={[
                 styles.separateLine,
@@ -282,7 +333,7 @@ const CancelJobs = () => {
             style={styles.removeButton}
             onPress={() => {
               refRBSheet.current.close();
-              navigation.navigate('cancelorder');
+              navigation.navigate('cancelorder',{item:"vi"});
             }}
           />
         </View>

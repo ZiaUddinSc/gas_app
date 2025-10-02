@@ -26,9 +26,15 @@ import {
 import {GetData} from '../helper/CommonHelper';
 import Settings from '../config/settings';
 import moment from 'moment';
+interface jobdata {
+  id: string;
+  name: string;
+}
 const OngoingJobs = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const refRBSheet = useRef<any>(null);
+  const [jobData, setJobData] = useState<any>([]);
+
   const {dark} = useTheme();
   const navigation = useNavigation<NavigationProp<any>>();
 
@@ -38,6 +44,11 @@ const OngoingJobs = () => {
       console.log('jobs', jobs?.data);
       setJobs(jobs?.data);
     }
+  };
+
+  const viewJobData = data => {
+    setJobData(data);
+    refRBSheet.current.open();
   };
 
   useFocusEffect(
@@ -73,12 +84,6 @@ const OngoingJobs = () => {
             <TouchableOpacity
               onPress={() => navigation.navigate('productreviews')}
               style={styles.detailsContainer}>
-              {/* <View>
-                 <ProfileAvatorView
-                  name={getInitials(item.name)}
-                 />
-                 
-              </View> */}
               <View>
                 <View
                   style={[
@@ -105,16 +110,7 @@ const OngoingJobs = () => {
                       {getInitials(item?.customer?.full_name)}
                     </Text>
                   </View>
-                  {/* < Image
-                    source={item.image}
-                    resizeMode='cover'
-                    style={styles.productImage}
-                  /> */}
                 </View>
-                {/* <View style={styles.reviewContainer}>
-                  <FontAwesome name="star" size={12} color="orange" />
-                  <Text style={styles.rating}>{item.rating}</Text>
-                </View> */}
               </View>
               <View style={styles.detailsRightContainer}>
                 <Text
@@ -133,19 +129,19 @@ const OngoingJobs = () => {
                       color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
                     },
                   ]}>
-                  {item?.customer?.address_line_1
-                    ? `${capitalizeWords(item?.customer?.address_line_1)}${
-                        item?.customer?.address_line_2
+                  {item?.property?.address_line_1
+                    ? `${capitalizeWords(item?.property?.address_line_1)}${
+                        item?.property?.address_line_2
                           ? ', ' +
-                            capitalizeWords(item?.customer?.address_line_2)
+                            capitalizeWords(item?.property?.address_line_2)
                           : ''
                       }${
-                        item?.customer?.city
-                          ? ', ' + capitalizeWords(item?.customer?.city)
+                        item?.property?.city
+                          ? ', ' + capitalizeWords(item?.property?.city)
                           : ''
                       }${
-                        item?.customer?.postal_code
-                          ? ', ' + item?.customer?.postal_code
+                        item?.property?.postal_code
+                          ? ', ' + item?.property?.postal_code
                           : ''
                       }`
                     : 'N/A'}
@@ -232,7 +228,7 @@ const OngoingJobs = () => {
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity
-                onPress={() => refRBSheet.current.open()}
+                onPress={() => viewJobData(item)}
                 style={[
                   styles.cancelBtn,
                   {
@@ -310,7 +306,7 @@ const OngoingJobs = () => {
                 color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
               },
             ]}>
-            Are you sure you want to cancel your job?
+            Confirm job cancellation?
           </Text>
           <Text
             style={[
@@ -319,7 +315,7 @@ const OngoingJobs = () => {
                 color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
               },
             ]}>
-            Cusomer Name:XYZ
+            {jobData?.customer?.full_name}
           </Text>
           <Text
             style={[
@@ -328,7 +324,21 @@ const OngoingJobs = () => {
                 color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
               },
             ]}>
-            Job Address:XYZ
+            {jobData?.property?.address_line_1
+              ? `${capitalizeWords(jobData?.property?.address_line_1)}${
+                  jobData?.property?.address_line_2
+                    ? ', ' + capitalizeWords(jobData?.property?.address_line_2)
+                    : ''
+                }${
+                  jobData?.property?.city
+                    ? ', ' + capitalizeWords(jobData?.property?.city)
+                    : ''
+                }${
+                  jobData?.property?.postal_code
+                    ? ', ' + jobData?.property?.postal_code
+                    : ''
+                }`
+              : 'N/A'}
           </Text>
           <Text
             style={[
@@ -337,7 +347,7 @@ const OngoingJobs = () => {
                 color: dark ? COLORS.grayscale400 : COLORS.grayscale700,
               },
             ]}>
-            Job Name:XYZ
+            {jobData?.description}
           </Text>
         </View>
 

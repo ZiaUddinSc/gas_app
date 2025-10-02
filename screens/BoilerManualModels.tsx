@@ -70,7 +70,7 @@ const BoilerManualModels = ({route}) => {
   const modelName =route?.params?.modelName || "Brand Name"
   const [search, setSearch] = useState('');
   const [allBoilerModels, setAllBoilerModels] = useState<BoilerModel[]>([]);
-
+  
   const handleSliderChange = (values: number[]) => {
     setPriceRange(values);
   };
@@ -136,6 +136,13 @@ const BoilerManualModels = ({route}) => {
       setLoadingMore(false);
     }
   };
+
+
+  const viewBoilerManualPdf = async(id)=>{
+  
+    // alert(JSON.stringify(response))
+  }
+
   const handleLoadMore = () => {
     if (loadingMore || !hasMore) return;
     fetchBoilerModels(page + 1, false, search);
@@ -183,10 +190,13 @@ const BoilerManualModels = ({route}) => {
     //  }
   };
 
-  const onclickPdfView = (brandInfo:BoilerModel) =>{
+  const onclickPdfView = async (brandInfo:BoilerModel) =>{
     refRBSheet.current.open()
     setBrandInfo(brandInfo)
-    setSelectedPdf(brandInfo?.pdf_url)
+    let response = await GetData(`${Settings.endpoints.boiler_manual_download(brandInfo?.id)}`)
+    if(response?.success){
+      setSelectedPdf(response?.data)
+    }
   }
 
   const renderHeader = () => {

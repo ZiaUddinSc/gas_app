@@ -12,25 +12,30 @@ import {
   Image,
 } from 'react-native';
 import React, {useCallback, useEffect, useReducer, useState} from 'react';
+import moment from 'moment';
 import {COLORS, SIZES, FONTS, icons, images} from '../constants';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../components/Header';
 import {reducer} from '../utils/reducers/formReducers';
 import {validateInput} from '../utils/actions/formActions';
 import Feather from 'react-native-vector-icons/Feather';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   ImageLibraryOptions,
   ImagePickerResponse,
   launchImageLibrary,
 } from 'react-native-image-picker';
-import Input from '../components/Input';
 import {getFormatedDate} from 'react-native-modern-datepicker';
-import DatePickerModal from '../components/DatePickerModal';
-import RNPickerSelect from 'react-native-picker-select';
 import {useTheme} from '../theme/ThemeProvider';
-import ButtonFilled from '../components/ButtonFilled';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import { GetData } from '../helper/CommonHelper';
+import {
+  NavigationProp,
+  useNavigation,
+  useFocusEffect,
+  useRoute,
+} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {GetSignature} from '../helper/GetApiHelper';
+import Settings from '../config/settings';
 
 const isTestMode = true;
 
@@ -60,8 +65,24 @@ interface RenderItemProps {
   item: Item;
 }
 
+interface UserInfo {
+  id: any;
+  name: string;
+  email: string;
+  installer_ref_no?: string;
+  oil_registration_number?: string;
+  gas_safe_id_card?: string;
+  photo_url?: string;
+  mobile: string;
+  max_job_per_slot: string;
+}
+interface PackageInfo {
+   user?: any;
+}
+
 const MyProfile = () => {
   const navigation = useNavigation<NavigationProp<any>>();
+  const route = useRoute();
   const [image, setImage] = useState<any>(null);
   const [error, setError] = useState();
   const [formState, dispatchFormState] = useReducer(reducer, initialState);
@@ -71,7 +92,55 @@ const MyProfile = () => {
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [selectedGender, setSelectedGender] = useState('');
   const {dark} = useTheme();
+  const [userInfo, setUserInfo] = useState<UserInfo>({} as UserInfo);
+  const [loading, setLoading] = useState(false);
+  const [signature, setSignature] = useState(); // for popup modal
+  const [packageInfo, setPackageInfo] = useState<PackageInfo>({} as PackageInfo);
+  const [signatureImage, setSignatureImage] = useState(null);
 
+  const loadUserData = async () => {
+    const userInfoString = await AsyncStorage.getItem('userInfo');
+    if (userInfoString) {
+      const parsedInfo: UserInfo = JSON.parse(userInfoString);
+      const res = await GetData(`${Settings.endpoints.user_plan_details(parsedInfo?.id)}`);
+      if(res?.data){
+        setPackageInfo(res?.data);
+      }
+      setUserInfo(parsedInfo);
+    }
+  };
+
+  useFocusEffect(
+    
+    useCallback(() => {
+      fetchSignature();
+      loadUserData();
+      if (route?.params?.signature) {
+        setSignatureImage(route.params.signature);
+      }
+    }, [route?.params?.signature]),
+  );
+
+  useEffect(()=>{
+   
+
+  },[])
+
+  const fetchSignature = async () => {
+    setLoading(true);
+    try {
+      const res = await GetSignature(userInfo.id);
+      if (res) {
+        console.log('signature====>', res.data);
+        setSignature(res.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      setLoading(false);
+    }
+    setLoading(false);
+  };
+ 
   const genderOptions = [
     {label: 'Male', value: 'male'},
     {label: 'Female', value: 'female'},
@@ -158,55 +227,71 @@ const MyProfile = () => {
       });
   }, []);
   const renderProfile = () => {
-    const [image, setImage] = useState(images.user1)
+    const [image, setImage] = useState(images.user1);
 
-      // Image Profile handler
-      const pickImage = () => {
-        const options: ImageLibraryOptions = {
-          mediaType: 'photo',
-          includeBase64: false,
-          maxHeight: 2000,
-          maxWidth: 2000,
-        };
-  
-        launchImageLibrary(options, (response: ImagePickerResponse) => {
-          if (response.didCancel) {
-            console.log('User cancelled image picker');
-          } else if (response.errorMessage) {
-            console.log('Image picker error: ', response.errorMessage);
-          } else if (response.assets && response.assets.length > 0) {
-            let imageUri = response.assets[0].uri;
-            setImage({ uri: imageUri });
-          }
-        });
+    // Image Profile handler
+    const pickImage = () => {
+      const options: ImageLibraryOptions = {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 2000,
+        maxWidth: 2000,
       };
+
+      launchImageLibrary(options, (response: ImagePickerResponse) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorMessage) {
+          console.log('Image picker error: ', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          let imageUri = response.assets[0].uri;
+          setImage({uri: imageUri});
+        }
+      });
+    };
 
     return (
       <View style={styles.profileContainer}>
         <View>
           <Image
-            source={image}
-            resizeMode='cover'
+            source={userInfo.photo_url ? {uri: userInfo.photo_url} : image}
+            resizeMode="cover"
             style={styles.avatar}
           />
-          <TouchableOpacity
-            onPress={pickImage}
-            style={styles.picContainer}>
+          <TouchableOpacity onPress={pickImage} style={styles.picContainer}>
             <Image
               source={icons.camera}
-              resizeMode='cover'
+              resizeMode="cover"
               tintColor={COLORS.white}
-              style={{height:20,width:20}}
+              style={{height: 20, width: 20}}
             />
             {/* <MaterialIcons name="edit" size={16} color={COLORS.white} /> */}
           </TouchableOpacity>
         </View>
-        <Text style={[styles.title, { color: dark ? COLORS.secondaryWhite : COLORS.greyscale900 }]}>Bhuiyan Sakib</Text>
-        <Text style={[styles.subtitle, { color: dark ? COLORS.secondaryWhite : COLORS.greyscale900 }]}>+44026452642</Text>
-        <Text style={[styles.subtitle, { color: dark ? COLORS.secondaryWhite : COLORS.greyscale900 }]}>nathalie_erneson@gmail.com</Text>
+        <Text
+          style={[
+            styles.title,
+            {color: dark ? COLORS.secondaryWhite : COLORS.greyscale900},
+          ]}>
+          {userInfo.name}
+        </Text>
+        <Text
+          style={[
+            styles.subtitle,
+            {color: dark ? COLORS.secondaryWhite : COLORS.greyscale900},
+          ]}>
+          {userInfo.mobile}
+        </Text>
+        <Text
+          style={[
+            styles.subtitle,
+            {color: dark ? COLORS.secondaryWhite : COLORS.greyscale900},
+          ]}>
+          {userInfo.email}
+        </Text>
       </View>
-    )
-  }
+    );
+  };
   // render countries codes modal
   function RenderAreasCodesModal() {
     const renderItem = ({item}: RenderItemProps) => {
@@ -274,9 +359,12 @@ const MyProfile = () => {
         ]}>
         <Header title="My Profile" />
         <ScrollView
-          style={[styles.scrollView, { backgroundColor: dark ? COLORS.dark1 : COLORS.tertiaryWhite }]}
+          style={[
+            styles.scrollView,
+            {backgroundColor: dark ? COLORS.dark1 : COLORS.tertiaryWhite},
+          ]}
           showsVerticalScrollIndicator={false}>
-            {renderProfile()}
+          {renderProfile()}
           {/* <View style={{alignItems: 'center', marginVertical: 12,height:200}}>
             <View style={styles.avatarContainer}>
               <Image
@@ -312,7 +400,7 @@ const MyProfile = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                625462
+                {userInfo.gas_safe_id_card}
               </Text>
             </View>
             <View style={styles.viewContainer}>
@@ -324,7 +412,9 @@ const MyProfile = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                625462
+                {userInfo.oil_registration_number
+                  ? userInfo.oil_registration_number
+                  : 'N/A'}
               </Text>
             </View>
             <View style={styles.viewContainer}>
@@ -336,7 +426,7 @@ const MyProfile = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                625462
+                {userInfo.installer_ref_no ? userInfo.installer_ref_no : 'N/A'}
               </Text>
             </View>
             <View style={styles.viewContainer}>
@@ -348,7 +438,7 @@ const MyProfile = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                1
+                {userInfo.max_job_per_slot ? userInfo.max_job_per_slot : 'N/A'}
               </Text>
             </View>
           </View>
@@ -375,7 +465,7 @@ const MyProfile = () => {
              </View> 
             </View>
           </View> */}
-            <View
+          <View
             style={[
               styles.summarySignatureContainer,
               {
@@ -384,14 +474,29 @@ const MyProfile = () => {
               },
             ]}>
             <View style={styles.viewSignatureContainer}>
-            <Text style={styles.viewLeft}>Signature</Text>
-            <Image
-                    source={{uri:'https://app.gascertificate.app/storage/signatures/c455b021-2103-40fa-8097-e5f0c44f1f58.png'}}
-                    resizeMode="cover"
-                    style={styles.signatureImage}
+              <Text style={styles.viewLeft}>Signature</Text>
+              {signatureImage ? (
+                <Image
+                  source={{uri: signatureImage}}
+                  resizeMode='contain'
+                  style={styles.signatureImage}
                 />
+              ) : (
+                <>
+                  {signature ? (
+                    <Image
+                      source={{uri: signature.path}}
+                      style={styles.signatureImage}
+                      resizeMode='contain'
+                    />
+                  ) : (
+                    <View style={styles.addSignature}>
+                      <Text style={styles.addSignatureText}>Add Signature</Text>
+                    </View>
+                  )}
+                </>
+              )}
             </View>
-         
           </View>
           <View
             style={[
@@ -410,40 +515,47 @@ const MyProfile = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                Monthly (£8.99)</Text>
+                Monthly (£{packageInfo?.user?.userpackage ? packageInfo?.user?.userpackage?.price.toFixed(2) :'0.00'})
+              </Text>
             </View>
             <View style={styles.viewContainer}>
-              <View>  
-              <Text style={styles.viewLeft}>Payment Method</Text>
-              <View style={{flexDirection:'row',marginTop:5}}>
-                <Image
-                    source={{uri:'https://app.gascertificate.app/build/assets/mastercard-a1edb8f2.png'}}
+              <View>
+                <Text style={styles.viewLeft}>Payment Method</Text>
+                <View style={{flexDirection: 'row', marginTop: 5}}>
+                  <Image
+                    source={{
+                      uri: 'https://app.gascertificate.app/build/assets/mastercard-a1edb8f2.png',
+                    }}
                     resizeMode="cover"
-                    style={{width:30,height:20,marginRight:5}}
-                />
-                 <Text style={styles.viewLeft}>Mastercard ....4444</Text>
-              </View>
+                    style={{width: 30, height: 20, marginRight: 5}}
+                  />
+                  <Text style={styles.viewLeft}>Mastercard ....4444</Text>
+                </View>
               </View>
               <View>
-              <Text
-                style={[
-                  styles.viewRight,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-                Credit Card
-              </Text>
-              <Text
-                style={[
-                  styles.viewRight,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-              Exp. : 12/2026
-              </Text>
-              
+                <Text
+                  style={[
+                    styles.viewRight,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
+                    },
+                  ]}>
+                  Credit Card
+                </Text>
+                <Text
+                  style={[
+                    styles.viewRight,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
+                    },
+                  ]}>
+                  {/* Exp. : 12/2026 */}
+                  Exp. : 
+                  { packageInfo?.user?.userpackage?.end ?
+                   moment( packageInfo?.user?.userpackage?.end, "DD-MM-YYYY").add(1, "year").format("MM/YYYY"):
+                   "N/A"
+                   }
+                </Text>
               </View>
             </View>
           </View>
@@ -459,7 +571,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   scrollView: {
-    backgroundColor: COLORS.tertiaryWhite
+    backgroundColor: COLORS.tertiaryWhite,
   },
   container: {
     flex: 1,
@@ -477,12 +589,12 @@ const styles = StyleSheet.create({
     height: 130,
     width: 130,
     borderRadius: 65,
-  },  
+  },
   title: {
     fontSize: 18,
-    fontFamily: "Urbanist Bold",
+    fontFamily: 'Urbanist Bold',
     color: COLORS.greyscale900,
-    marginTop: 12
+    marginTop: 12,
   },
   pickImage: {
     height: 42,
@@ -585,7 +697,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     alignItems: 'center',
     paddingLeft: 12,
-    paddingRight:12,
+    paddingRight: 12,
     marginVertical: 8,
   },
   viewContainer: {
@@ -608,30 +720,38 @@ const styles = StyleSheet.create({
   signatureImage: {
     height: 100,
     width: 100,
-alignItems:'center'    // borderRadius: 65,
+    alignItems: 'center', // borderRadius: 65,
+  },
+  addSignature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addSignatureText: {
+    marginLeft: 10,
+    color: '#555',
   },
   profileContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     borderBottomColor: COLORS.grayscale400,
-    borderBottomWidth: .4,
-    paddingVertical: 20
+    borderBottomWidth: 0.4,
+    paddingVertical: 20,
   },
   picContainer: {
     width: 20,
     height: 20,
     borderRadius: 4,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: COLORS.primary,
-    position: "absolute",
+    position: 'absolute',
     right: 0,
-    bottom: 12
+    bottom: 12,
   },
   subtitle: {
     fontSize: 16,
     color: COLORS.greyscale900,
-    fontFamily: "Urbanist Medium",
-    marginTop: 4
+    fontFamily: 'Urbanist Medium',
+    marginTop: 4,
   },
   viewSignatureContainer: {
     flexDirection: 'row',

@@ -67,6 +67,9 @@ const Settings = {
       company_user_store: `api/v1/users/store`,
       packages: `api/v1/pricing-packages`,
       get_status_slots: `api/v1/jobs/get-slot-status`,
+      boiler_manual_download:(id)=> `api/v1/boiler-brand/download-manual/${id}`,
+      cancel_reasons: `api/v1/cancel-reasons`,
+      user_plan_details:(id)=> `api/v1/users/plans/${id}`,  
      },
   
     version: {

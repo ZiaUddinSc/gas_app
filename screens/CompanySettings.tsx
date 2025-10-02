@@ -18,7 +18,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../components/Header';
 import {reducer} from '../utils/reducers/formReducers';
 import {validateInput} from '../utils/actions/formActions';
-import { capitalizeWords,parseFullNumber } from '../helper/customMethods';
+import {capitalizeWords, parseFullNumber} from '../helper/customMethods';
 import {
   ImageLibraryOptions,
   ImagePickerResponse,
@@ -30,8 +30,15 @@ import DatePickerModal from '../components/DatePickerModal';
 import RNPickerSelect from 'react-native-picker-select';
 import {useTheme} from '../theme/ThemeProvider';
 import ButtonFilled from '../components/ButtonFilled';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native';
 import AddressViewItem from '../components/AddressViewItem';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {GetCompanyDetails, GetSingleUser} from '../helper/GetApiHelper';
+import LottieLoader from '../components/LottieLoader';
 
 const isTestMode = true;
 
@@ -69,11 +76,17 @@ const CompanySettings = () => {
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [isVatRegisterEnabled, setIsVatRegisterEnabled] = useState<boolean>(false);
-  const [isDisplayCertificaterEnabled, setIsDisplayCertificaterEnabled] = useState<boolean>(false);
+  const [isVatRegisterEnabled, setIsVatRegisterEnabled] =
+    useState<boolean>(false);
+  const [isDisplayCertificaterEnabled, setIsDisplayCertificaterEnabled] =
+    useState<boolean>(false);
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [selectedGender, setSelectedGender] = useState('');
   const {dark} = useTheme();
+
+  const [userInfo, setUserInfo] = useState();
+  const [companyDetails, setCompanyDetails] = useState();
+  const [loading, setLoading] = useState(false);
 
   const genderOptions = [
     {label: 'Male', value: 'male'},
@@ -113,6 +126,42 @@ const CompanySettings = () => {
       Alert.alert('An error occured', error);
     }
   }, [error]);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const userInfoString = await AsyncStorage.getItem('userInfo');
+      setUserInfo(JSON.parse(userInfoString));
+    };
+    fetchUserInfo();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (userInfo?.id) {
+        fetchCompanyDetails();
+      }
+    }, [userInfo]),
+  );
+
+  const fetchCompanyDetails = async () => {
+    if (!userInfo?.id) return;
+    setLoading(true);
+    try {
+      const res = await GetSingleUser(userInfo?.id); // Replace with actual user ID
+
+      if (res.success) {
+        const resCompanyDetails = await GetCompanyDetails(
+          res.data.companies[0].id,
+        );
+        console.log('setCompanyDetails', resCompanyDetails.data.company);
+        setCompanyDetails(resCompanyDetails.data);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      setLoading(false);
+    }
+  };
 
   // Image Profile handler
   const pickImage = () => {
@@ -161,6 +210,9 @@ const CompanySettings = () => {
       });
   }, []);
 
+  if (loading || !companyDetails) {
+    return <LottieLoader visible={loading} />;
+  }
   // render countries codes modal
   function RenderAreasCodesModal() {
     const renderItem = ({item}: RenderItemProps) => {
@@ -228,9 +280,11 @@ const CompanySettings = () => {
         ]}>
         <Header title="Company Settings" />
         <ScrollView
-          style={[styles.scrollView, { backgroundColor: dark ? COLORS.dark1 : COLORS.tertiaryWhite }]}
+          style={[
+            styles.scrollView,
+            {backgroundColor: dark ? COLORS.dark1 : COLORS.tertiaryWhite},
+          ]}
           showsVerticalScrollIndicator={false}>
-          
           <View
             style={[
               styles.summaryFirstContainer,
@@ -248,7 +302,7 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                XYZ
+                {companyDetails?.company?.company_name}
               </Text>
             </View>
             <View style={styles.viewContainer}>
@@ -260,7 +314,7 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                Company
+                {companyDetails?.company?.business_type}
               </Text>
             </View>
             <View style={styles.viewContainer}>
@@ -272,7 +326,9 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                625462213131313
+                {companyDetails?.company?.company_registration
+                  ? companyDetails?.company?.company_registration
+                  : 'N/A'}
               </Text>
             </View>
             <View style={styles.viewContainer}>
@@ -281,14 +337,14 @@ const CompanySettings = () => {
                 value={isVatRegisterEnabled}
                 thumbColor={isVatRegisterEnabled ? 'green' : 'red'}
                 trackColor={{
-                    false: '#EEEEEE',
-                    true: dark ? COLORS.white : COLORS.grayscale700,
+                  false: '#EEEEEE',
+                  true: dark ? COLORS.white : COLORS.grayscale700,
                 }}
-                ios_backgroundColor={
-                    dark ? COLORS.white : COLORS.grayscale700
+                ios_backgroundColor={dark ? COLORS.white : COLORS.grayscale700}
+                onValueChange={() =>
+                  setIsVatRegisterEnabled(!isVatRegisterEnabled)
                 }
-                onValueChange={()=>setIsVatRegisterEnabled(!isVatRegisterEnabled)}
-                />
+              />
               {/* <Text
                 style={[
                   styles.viewRight,
@@ -299,23 +355,26 @@ const CompanySettings = () => {
                 625462
               </Text> */}
             </View>
-            {isVatRegisterEnabled ?
+            {isVatRegisterEnabled ? (
+              <View style={styles.viewContainer}>
+                <Text style={styles.viewLeft}>Vat Registration Number</Text>
+                <Text
+                  style={[
+                    styles.viewRight,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
+                    },
+                  ]}>
+                  {companyDetails?.company?.vat_number
+                    ? companyDetails?.company?.vat_number
+                    : 'N/A'}
+                </Text>
+              </View>
+            ) : null}
             <View style={styles.viewContainer}>
-              <Text style={styles.viewLeft}>Vat Registration Number</Text>
-              <Text
-                style={[
-                  styles.viewRight,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-                625462213131313
+              <Text style={styles.viewLeft}>
+                Show company name on certificates?
               </Text>
-            </View>
-            :null
-            }
-            <View style={styles.viewContainer}>
-              <Text style={styles.viewLeft}>Show company name on certificates?</Text>
               <Text
                 style={[
                   styles.viewRight,
@@ -324,20 +383,44 @@ const CompanySettings = () => {
                   },
                 ]}>
                 <Switch
-                value={isDisplayCertificaterEnabled}
-                thumbColor={isDisplayCertificaterEnabled ? 'green' : 'red'}
-                trackColor={{
+                  value={isDisplayCertificaterEnabled}
+                  thumbColor={isDisplayCertificaterEnabled ? 'green' : 'red'}
+                  trackColor={{
                     false: '#EEEEEE',
                     true: dark ? COLORS.white : COLORS.grayscale700,
-                }}
-                ios_backgroundColor={
+                  }}
+                  ios_backgroundColor={
                     dark ? COLORS.white : COLORS.grayscale700
-                }
-                onValueChange={()=>setIsDisplayCertificaterEnabled(!isDisplayCertificaterEnabled)}
+                  }
+                  onValueChange={() =>
+                    setIsDisplayCertificaterEnabled(
+                      !isDisplayCertificaterEnabled,
+                    )
+                  }
                 />
               </Text>
             </View>
+
+            {isDisplayCertificaterEnabled ? (
+              <View style={styles.viewContainer}>
+                <Text style={styles.viewLeft}>
+                  Show company name on certificates?
+                </Text>
+                <Text
+                  style={[
+                    styles.viewRight,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
+                    },
+                  ]}>
+                  {companyDetails?.company?.display_company_name
+                    ? companyDetails?.company?.display_company_name
+                    : 'N/A'}
+                </Text>
+              </View>
+            ) : null}
           </View>
+
           <View
             style={[
               styles.summaryAddressContainer,
@@ -347,22 +430,22 @@ const CompanySettings = () => {
               },
             ]}>
             <View style={styles.viewAddreesContainer}>
-             <View>
               <View>
-              <AddressViewItem
-                onPress={() =>{}
-                    // navigation.navigate('updateoccupiedaddress', {
-                    // address: item,
-                    // customerId: customerId,
-                    // })
-                }
-                address={'124 City Road'}
-                others={` London, EC1V 2NX `}
-                icon={false}
-            />
-                
+                <View>
+                  <AddressViewItem
+                    onPress={
+                      () => {}
+                      // navigation.navigate('updateoccupiedaddress', {
+                      // address: item,
+                      // customerId: customerId,
+                      // })
+                    }
+                    address={companyDetails?.company?.full_address}
+                    // others={` London, EC1V 2NX `}
+                    icon={false}
+                  />
+                </View>
               </View>
-             </View> 
               {/* <View
                 style={[
                   styles.viewRight,
@@ -370,9 +453,7 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}> */}
-               
             </View>
-           
           </View>
           <View
             style={[
@@ -391,7 +472,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                +44525252</Text>
+                {companyDetails.company.company_phone
+                  ? companyDetails.company.company_phone
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Email</Text>
@@ -402,7 +486,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                admin@yahoo.com</Text>
+                {companyDetails.company.company_email
+                  ? companyDetails.company.company_email
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Website</Text>
@@ -413,7 +500,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                www.xyz.com</Text>
+                {companyDetails.company.company_web_site
+                  ? companyDetails.company.company_web_site
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Company Tagline</Text>
@@ -424,9 +514,11 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                test</Text>
+                {companyDetails.company.company_tagline
+                  ? companyDetails.company.company_tagline
+                  : 'N/A'}
+              </Text>
             </View>
-        
           </View>
           <View
             style={[
@@ -438,6 +530,7 @@ const CompanySettings = () => {
             ]}>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Account Name</Text>
+
               <Text
                 style={[
                   styles.viewRight,
@@ -445,10 +538,14 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-               Zia Uddin</Text>
+                {companyDetails.company.company_bank_details.name_on_account
+                  ? companyDetails.company.company_bank_details.name_on_account
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Short Code</Text>
+
               <Text
                 style={[
                   styles.viewRight,
@@ -456,7 +553,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-               40-02-44</Text>
+                {companyDetails.company.company_bank_details.sort_code
+                  ? companyDetails.company.company_bank_details.sort_code
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Account Number</Text>
@@ -467,7 +567,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-               21585649</Text>
+                {companyDetails.company.company_bank_details.account_number
+                  ? companyDetails.company.company_bank_details.account_number
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Payment Terms</Text>
@@ -478,7 +581,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                30 Days</Text>
+                {companyDetails.company.company_bank_details.payment_term
+                  ? companyDetails.company.company_bank_details.payment_term
+                  : 'N/A'}
+              </Text>
             </View>
           </View>
           <View
@@ -498,7 +604,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-               4342535</Text>
+                {companyDetails.company.gas_safe_registration_no
+                  ? companyDetails.company.gas_safe_registration_no
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Registration No</Text>
@@ -509,7 +618,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-               54345345</Text>
+                {companyDetails.company.registration_no
+                  ? companyDetails.company.registration_no
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
               <Text style={styles.viewLeft}>Registration Body For</Text>
@@ -520,10 +632,15 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-               test</Text>
+                {companyDetails.company.register_body_id
+                  ? companyDetails.company.register_body_id
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
-              <Text style={styles.viewLeft}>Registration Body For Legionella Risk Assessment</Text>
+              <Text style={styles.viewLeft}>
+                Registration Body For Legionella Risk Assessment
+              </Text>
               <Text
                 style={[
                   styles.viewRight,
@@ -531,10 +648,15 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                34534</Text>
+                {companyDetails.company.registration_body_for_legionella
+                  ? companyDetails.company.registration_body_for_legionella
+                  : 'N/A'}
+              </Text>
             </View>
             <View style={styles.viewContainer}>
-              <Text style={styles.viewLeft}>Registration No For Legionella Risk Assessment</Text>
+              <Text style={styles.viewLeft}>
+                Registration No For Legionella Risk Assessment
+              </Text>
               <Text
                 style={[
                   styles.viewRight,
@@ -542,7 +664,10 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                345345</Text>
+                {companyDetails.company.registration_body_no_for_legionella
+                  ? companyDetails.company.registration_body_no_for_legionella
+                  : 'N/A'}
+              </Text>
             </View>
           </View>
         </ScrollView>
@@ -557,7 +682,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   scrollView: {
-    backgroundColor: COLORS.tertiaryWhite
+    backgroundColor: COLORS.tertiaryWhite,
   },
   container: {
     flex: 1,

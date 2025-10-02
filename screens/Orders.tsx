@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
-import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions, } from 'react-native';
+import React,{useRef,useEffect} from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -27,6 +27,7 @@ interface RenderLabelProps {
 const Orders = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const layout = useWindowDimensions();
+  const refProfileSheet = useRef<any>(null);
   const { dark, colors } = useTheme();
 
   const [index, setIndex] = React.useState(0);
@@ -58,6 +59,12 @@ const Orders = () => {
       )}
     />
   )
+
+  // useEffect(() => {
+  //   // Auto open when component mounts
+  //   alert("test")
+  //   refProfileSheet.current?.open();
+  // }, []);
 
   /**
   * Render header
@@ -146,6 +153,32 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     tintColor: COLORS.black
+  },
+  bottomTitle: {
+    fontSize: 24,
+    fontFamily: 'Urbanist SemiBold',
+    color: 'red',
+    textAlign: 'center',
+  },
+  bottomSubtitle: {
+    fontSize: 22,
+    fontFamily: 'Urbanist Bold',
+    color: COLORS.greyscale900,
+    textAlign: 'center',
+    marginVertical: 12,
+  },
+  separateLine: {
+    width: '100%',
+    height: 0.7,
+    backgroundColor: COLORS.greyScale800,
+    marginVertical: 12,
+  },
+  bottomContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 12,
+    paddingHorizontal: 16,
   },
 })
 

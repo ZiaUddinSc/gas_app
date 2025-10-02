@@ -46,6 +46,7 @@ const SelectShippingAddress = ({route}) => {
           : ''
       }`}
       others={`${capitalizeWords(item?.city)}, ${item?.postal_code ?? 'N/A'}`}
+      icon={job ? false :true}
     />
   );
 
