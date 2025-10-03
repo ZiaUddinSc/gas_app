@@ -94,7 +94,9 @@ import {
   MyProfile,
   CompanySettings,
   CustomerSelectScreen,
-  DateTimePickerScreen
+  DateTimePickerScreen,
+  JobDetailsScreen,
+  CalendarScreen
 } from '../screens';
 import BottomTabNavigation from './BottomTabNavigation';
 
@@ -271,7 +273,8 @@ const AppNavigation = () => {
         <Stack.Screen name="companysettings" component={CompanySettings} />
         <Stack.Screen name="customerselectscreen" component={CustomerSelectScreen} />
         <Stack.Screen name="datetimepickerscreen" component={DateTimePickerScreen} />
-        
+        <Stack.Screen name="jobdetailsscreen" component={JobDetailsScreen} />
+        <Stack.Screen name="calendarscreen" component={CalendarScreen} /> 
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>

@@ -108,7 +108,10 @@ const Login = () => {
             data: {otp: response?.data, user_id: response?.user_id},
           });
         } else {
-          alert(JSON.stringify(response));
+          Alert.alert(
+            'Error',
+            'No account found with this phone number. Please check the number or sign up.',
+          );
         }
       });
       // UserOTPLogin({mobile:phone})
@@ -155,10 +158,13 @@ const Login = () => {
           <Text style={styles.flag}>🇬🇧</Text>
           <Text style={styles.prefix}>+44</Text>
           <TextInput
-            style={[styles.input, {
-              color: dark ? COLORS.white : COLORS.black, // text color
-              backgroundColor:  dark ? COLORS.black : COLORS.white, // optional: input background
-            },]}
+            style={[
+              styles.input,
+              {
+                color: dark ? COLORS.white : COLORS.black, // text color
+                backgroundColor: dark ? COLORS.black : COLORS.white, // optional: input background
+              },
+            ]}
             placeholder="Enter your phone number"
             placeholderTextColor={dark ? COLORS.white : COLORS.black}
             selectionColor="#111"
@@ -166,7 +172,6 @@ const Login = () => {
             onChangeText={handleChange}
             keyboardType="numeric"
             // autoFocus={true}
-            
           />
         </View>
 

@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingTop: 28,
     borderRadius: 32,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: "red",
   },
   bannerTopContainer: {
     flexDirection: 'row',

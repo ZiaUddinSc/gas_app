@@ -96,6 +96,8 @@ import CompanySettings from "./CompanySettings";
 import CustomerSelectScreen from "./CustomerSelectScreen";
 import DateTimePickerScreen from "../components/DateTimePickerScreen";
 import CancelJobs from "../screens/CancelJobs";
+import JobDetailsScreen from "../screens/JobDetailsScreen";
+import CalendarScreen from "../screens/CalendarScreen/CalendarScreen";
 export {
     AddNewAddress,
     AddNewCard,
@@ -193,5 +195,7 @@ export {
     CompanySettings,
     CustomerSelectScreen,
     DateTimePickerScreen,
-    CancelJobs
+    CancelJobs,
+    JobDetailsScreen,
+    CalendarScreen
 }

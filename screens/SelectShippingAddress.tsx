@@ -25,6 +25,7 @@ const SelectShippingAddress = ({route}) => {
   const [filteredAddress, setFilteredAddress] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
+  // alert(navigateScreen)
   const renderItem = ({item}: any) => (
     <AddressItem
       onPress={() =>
@@ -33,7 +34,8 @@ const SelectShippingAddress = ({route}) => {
           address: item,
           customerId: customerId,
           job:job,
-          selectedCustomer:selectedCustomer
+          selectedCustomer:selectedCustomer,
+          initialValues:item
         })
       }
       address={`${

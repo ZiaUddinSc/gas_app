@@ -87,6 +87,7 @@ const CompanySettings = () => {
   const [userInfo, setUserInfo] = useState();
   const [companyDetails, setCompanyDetails] = useState();
   const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const genderOptions = [
     {label: 'Male', value: 'male'},
@@ -267,6 +268,90 @@ const CompanySettings = () => {
     );
   }
 
+  const renderHeader = () => {
+    return (
+      <View>
+        <View style={styles.headerContainer}>
+          {/* Left side: Back button + Title */}
+          <TouchableOpacity
+            style={styles.headerLeft}
+            onPress={() => navigation.goBack()}>
+            <Image
+              source={icons.arrowLeft}
+              resizeMode="contain"
+              style={styles.logo}
+            />
+            <Text
+              style={[
+                styles.headerTitle,
+                {color: dark ? COLORS.white : COLORS.greyscale900},
+              ]}>
+              Customer Details
+            </Text>
+          </TouchableOpacity>
+
+          {/* Right side: 3-dot menu */}
+          <TouchableOpacity onPress={() => setShowDropdown(prev => !prev)}>
+            <Image
+              source={icons.moreHorizontal}
+              resizeMode="contain"
+              style={[
+                styles.headerIcon,
+                {tintColor: dark ? COLORS.secondaryWhite : COLORS.greyscale900},
+              ]}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Dropdown */}
+        {showDropdown && (
+          <View style={styles.topdropdown}>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                // navigation.navigate('editcustomer', {customerId: customerId});
+              }}>
+              <Text style={styles.dropdownText}>Company Information</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                // navigation.navigate('editcustomer', {customerId: customerId});
+              }}>
+              <Text style={styles.dropdownText}>Compnay Address</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                // navigation.navigate('editcustomer', {customerId: customerId});
+              }}>
+              <Text style={styles.dropdownText}>Contact Details</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                // navigation.navigate('editcustomer', {customerId: customerId});
+              }}>
+              <Text style={styles.dropdownText}>Bank Details</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                // navigation.navigate('editcustomer', {customerId: customerId});
+              }}>
+              <Text style={styles.dropdownText}>Registered Details</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView
       style={[
@@ -278,7 +363,9 @@ const CompanySettings = () => {
           styles.container,
           {backgroundColor: dark ? COLORS.dark1 : COLORS.white},
         ]}>
-        <Header title="Company Settings" />
+        {/* <Header title="Company Settings" /> */}
+        {renderHeader()}
+
         <ScrollView
           style={[
             styles.scrollView,
@@ -728,6 +815,26 @@ const styles = StyleSheet.create({
     height: 10,
     tintColor: '#111',
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    height: 32,
+    width: 32,
+    tintColor: COLORS.primary,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: 'Urbanist Bold',
+    color: COLORS.greyscale900,
+    marginLeft: 12,
+  },
   selectFlagContainer: {
     width: 90,
     height: 50,
@@ -797,6 +904,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
   },
+  headerIcon: {
+    height: 24,
+    width: 24,
+    tintColor: COLORS.greyscale900,
+  },
   summaryAddressContainer: {
     width: SIZES.width - 32,
     backgroundColor: COLORS.white,
@@ -835,6 +947,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Urbanist Medium',
     color: COLORS.black,
+  },
+  topdropdown: {
+    position: 'absolute',
+    top: 30, // just below header
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    elevation: 5, // shadow for Android
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    minWidth: 100,
+    zIndex: 1000,
+  },
+  dropdownItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 

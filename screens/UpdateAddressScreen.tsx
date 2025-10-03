@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {CustomerUpdate} from '../helper/CustomerHelper';
+import {CustomerUpdate,CustomerJobAddressUpdate} from '../helper/CustomerHelper';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useTheme} from '../theme/ThemeProvider';
 import {COLORS, SIZES, FONTS, icons} from '../constants';
@@ -28,14 +28,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ButtonFilled from '../components/ButtonFilled';
 import ButtonOutlined from '../components/ButtonOutlined';
 import Input from '../components/Input';
-
+import MessageModal from '../components/MessageModal';
 
 
 
 
 const UpdateAddressAddScreen = ({route}) => {
   const navigation = useNavigation();
-
+  const [modelOpen, setModelOpen] = useState(false);
   const initialValues = route?.params?.initialValues
   const customerId = route?.params?.customerId;
   const {colors, dark} = useTheme();
@@ -52,10 +52,19 @@ const UpdateAddressAddScreen = ({route}) => {
       longitude: values.longitude,
       postal_code: values.postal_code,
     };
-    const res = await CustomerUpdate(customerId, payload);
-    if (res.success) {
-      Alert.alert('Suucess', 'Address updated successfully')
-       navigation.goBack();
+  let res:any="" 
+    if(initialValues?.id){
+      res = await CustomerJobAddressUpdate(initialValues?.id, payload)
+    }else{
+       res = await CustomerUpdate(customerId, payload);
+
+    }
+    if (res?.success) {
+      setModelOpen(true)
+      setTimeout(()=>{
+        setModelOpen(false)
+        navigation.goBack()
+      },1500)
     } else {
       Alert.alert('Error', 'Failed to update address');
     }
@@ -130,6 +139,12 @@ const UpdateAddressAddScreen = ({route}) => {
             </Formik>
           </View>
         </KeyboardAwareScrollView>
+        <MessageModal
+          open={modelOpen}
+          icon={icons.location}
+          heading='Success !'
+          title='Address updated successfully.'
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );

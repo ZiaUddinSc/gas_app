@@ -24,7 +24,7 @@ import {useTheme} from '../theme/ThemeProvider';
 import {NavigationProp, useNavigation,useFocusEffect} from '@react-navigation/native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {GetCustomers} from '../helper/GetApiHelper';
-import {getInitials,capitalizeWords} from '../helper/customMethods';
+import {getInitials,capitalizeWords,removeZeroAndBracket,phoneNumberWithZero} from '../helper/customMethods';
 
 type Customer = {
   id: string;
@@ -396,7 +396,7 @@ const Customers = () => {
             Customers
           </Text>
         </View>
-        <View style={styles.headerRight}>
+        {/* <View style={styles.headerRight}>
           <TouchableOpacity onPress={() => onClickSearchView()}>
             <Image
               source={icons.search}
@@ -409,19 +409,7 @@ const Customers = () => {
               ]}
             />
           </TouchableOpacity>
-          {/* <TouchableOpacity>
-            <Image
-              source={icons.moreCircle}
-              resizeMode="contain"
-              style={[
-                styles.moreCircleIcon,
-                {
-                  tintColor: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
-                },
-              ]}
-            />
-          </TouchableOpacity> */}
-        </View>
+        </View> */}
       </View>
     );
   };
@@ -430,8 +418,8 @@ const Customers = () => {
     <SafeAreaView style={[styles.area, {backgroundColor: colors.background}]}>
       <View style={[styles.container, {backgroundColor: colors.background}]}>
         {renderHeader()}
-        {searchView ? (
-          <>
+        {/* {searchView ? (
+          <> */}
             <View
               style={[
                 styles.inputContainer,
@@ -456,8 +444,8 @@ const Customers = () => {
                 value={search}
               />
             </View>
-          </>
-        ) : null}
+          {/* </>
+        ) : null} */}
 
         <View style={{marginTop: 10}}>
           <SectionList<Customer, CallSection>
@@ -611,7 +599,7 @@ const Customers = () => {
           {customerCallInfo?.contact?.phone ? (
             <View>
               <Button
-                title={customerCallInfo?.contact?.phone}
+                title={phoneNumberWithZero(customerCallInfo?.contact?.phone)}
                 style={{
                   width: (SIZES.width - 32) / 2 - 8,
                   backgroundColor: dark
@@ -622,13 +610,13 @@ const Customers = () => {
                 }}
                 textColor={dark ? COLORS.white : COLORS.primary}
                 onPress={() =>
-                  Linking.openURL(`tel:${customerCallInfo?.contact?.phone}`)
+                  Linking.openURL(`tel:${removeZeroAndBracket(customerCallInfo?.contact?.phone)}`)
                 }
               />
               <View style={styles.smsIconStyle}>
                 <TouchableOpacity
                   onPress={() =>
-                    shareToWhatsApp(customerCallInfo?.contact?.phone, '')
+                    shareToWhatsApp(removeZeroAndBracket(customerCallInfo?.contact?.phone), '')
                   }>
                   <Image
                     source={icons.whatsapp}
@@ -642,7 +630,7 @@ const Customers = () => {
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => sendSMS(customerCallInfo?.contact?.phone, '')}>
+                  onPress={() => sendSMS(removeZeroAndBracket(customerCallInfo?.contact?.phone), '')}>
                   <Image
                     source={icons.sms_blue}
                     resizeMode="contain"
@@ -660,16 +648,16 @@ const Customers = () => {
           {customerCallInfo?.contact?.mobile ? (
             <View>
               <ButtonFilled
-                title={customerCallInfo?.contact?.mobile}
+                title={phoneNumberWithZero(customerCallInfo?.contact?.mobile)}
                 style={styles.removeButton}
                 onPress={() =>
-                  Linking.openURL(`tel:${customerCallInfo?.contact?.mobile}`)
+                  Linking.openURL(`tel:${removeZeroAndBracket(customerCallInfo?.contact?.mobile)}`)
                 }
               />
               <View style={styles.smsIconStyle}>
                 <TouchableOpacity
                   onPress={() =>
-                    shareToWhatsApp(customerCallInfo?.contact?.mobile, '')
+                    shareToWhatsApp(removeZeroAndBracket(customerCallInfo?.contact?.mobile), '')
                   }>
                   <Image
                     source={icons.whatsapp}
@@ -684,7 +672,7 @@ const Customers = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() =>
-                    sendSMS(customerCallInfo?.contact?.mobile, '')
+                    sendSMS(removeZeroAndBracket(customerCallInfo?.contact?.mobile), '')
                   }>
                   <Image
                     source={icons.sms_blue}

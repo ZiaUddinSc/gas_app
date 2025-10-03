@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
-import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions, } from 'react-native';
+import React,{useCallback} from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation,useFocusEffect } from '@react-navigation/native';
 import { CancelJobs, CompletedOrders, OngoingJobs } from '../tabs/jobTabs'
 import { COLORS, icons, images, SIZES } from '../constants';
 import { useTheme } from '../theme/ThemeProvider';
@@ -25,17 +25,28 @@ interface RenderLabelProps {
 }
 
 
-const MyJobs = () => {
+const MyJobs = ({route}) => {
   const navigation = useNavigation<NavigationProp<any>>();
   const layout = useWindowDimensions();
   const { dark, colors } = useTheme();
-
+  const success =route?.params?.success
+  
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     { key: 'first', title: 'Ongoing' },
     { key: 'second', title: 'Completed' },
     { key: 'third', title: 'Cancelled' }
   ]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if(success){
+        setIndex(2);
+      }else{
+        setIndex(0);
+      }
+    }, [])
+  );
 
   const renderTabBar = (props: any) => (
     <TabBar

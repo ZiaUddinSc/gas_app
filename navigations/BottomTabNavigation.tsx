@@ -10,9 +10,9 @@ import React, {useRef} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {COLORS, FONTS, icons, SIZES} from '../constants';
 import {useTheme} from '../theme/ThemeProvider';
-import {Cart, Home, Orders, UserProfileSettings, Wallet} from '../screens';
+import {Cart, Home, Orders, UserProfileSettings, Wallet,CalendarScreen} from '../screens';
 import Icon from '../src/theme/Icon';
-import style from '../src/components/CallNumberModal/style';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 
 const Tab = createBottomTabNavigator();
@@ -20,27 +20,35 @@ const items = [
   {
     label: 'New Certificate',
     icon: <Image source={Icon.icGoogle} width={15} height={15} />,
-    iconColor: '#FFFF00',
+    navigateScreen: '',
   },
 
   {
     label: 'Quote',
     icon: <Image source={Icon.icGoogle} width={15} height={15} />,
+    navigateScreen: '',
   },
 
   {
     label: 'Invoice',
     icon: <Image source={Icon.icGoogle} width={15} height={15} />,
+    navigateScreen: '',
   },
-  {label: 'Job', icon: <Image source={Icon.icGoogle} width={15} height={15} />},
+  {label: 'Job', icon: <Image source={Icon.icGoogle} width={15} height={15} />,
+   navigateScreen: 'createnewjob',
+  },
+
   {
     label: 'Customer',
     icon: <Image source={Icon.icGoogle} width={15} height={15} />,
+    navigateScreen: 'add-new-customer',
   },
 ];
 const BottomTabNavigation = () => {
   const {dark} = useTheme();
   const refProfileSheet = useRef<any>(null);
+  const navigation = useNavigation<NavigationProp<any>>();
+
 
   return (
     <>
@@ -105,8 +113,8 @@ const BottomTabNavigation = () => {
           }}
         />
         <Tab.Screen
-          name="calender"
-          component={Cart}
+          name="calendar"
+          component={CalendarScreen}
           options={{
             title: '',
             tabBarIcon: ({focused}: {focused: boolean}) => {
@@ -298,7 +306,7 @@ const BottomTabNavigation = () => {
       <RBSheet
         ref={refProfileSheet}
         closeOnPressMask={true}
-        height={SIZES.height * 0.8}
+        height={SIZES.height * 0.5}
         customStyles={{
           wrapper: {
             backgroundColor: 'rgba(0,0,0,0.5)',
@@ -310,33 +318,37 @@ const BottomTabNavigation = () => {
           container: {
             borderTopRightRadius: 32,
             borderTopLeftRadius: 32,
-            height: 260,
+            height: 330,
             backgroundColor: dark ? COLORS.dark2 : COLORS.white,
           },
         }}>
+        <View style={{backgroundColor:COLORS.secondary,padding:5}}>    
         <Text style={styles.bottomTitle}>Add New</Text>
+        </View>
         <View
           style={[
             styles.separateLine,
             {
-              backgroundColor: dark ? COLORS.greyScale800 : COLORS.grayscale200,
+                borderColor: dark ? COLORS.greyScale800 : COLORS.black,
             },
           ]}
         />
         {items?.map((item: any, index: number) => (
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={()=>item?.navigateScreen ? navigation.navigate(item?.navigateScreen) :{} }
+          >
             <Text
               style={[
-                styles.bottomSubtitle,
+                styles.bottomSubtitle,{padding : index ===0 ? 2:0},
                 {
                   color: dark ? COLORS.white : COLORS.black,
                 },
               ]}>
-              {item.label}
+              {item?.label}
             </Text>
             <View
               style={[
-                styles.itemSeparateLine,
+                styles.itemSeparateLine,{marginVertical:index === 0 ? 2 : 4},
                 {
                   backgroundColor: dark
                     ? COLORS.greyScale800
@@ -373,24 +385,27 @@ const BottomTabNavigation = () => {
 };
 const styles = StyleSheet.create({
   bottomTitle: {
-    fontSize: 25,
-    fontFamily: 'Urbanist SemiBold',
+    fontSize: 30,
+    fontFamily: 'Urbanist Medium',
     color: COLORS.black,
     textAlign: 'center',
     padding: 10,
+  
   },
   bottomSubtitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: 'Urbanist Bold',
     color: COLORS.greyscale900,
     textAlign: 'center',
-    margin: 6,
+    margin: 8,
   },
   separateLine: {
     width: '100%',
     height: 0.7,
-    backgroundColor: COLORS.greyScale800,
-    marginVertical: 12,
+    borderColor:'black',
+    borderWidth: 0.3,
+    // backgroundColor: COLORS.greyScale800,
+    // marginVertical: 12,
   },
   itemSeparateLine: {
     width: '100%',

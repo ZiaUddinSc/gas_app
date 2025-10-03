@@ -70,6 +70,8 @@ const Settings = {
       boiler_manual_download:(id)=> `api/v1/boiler-brand/download-manual/${id}`,
       cancel_reasons: `api/v1/cancel-reasons`,
       user_plan_details:(id)=> `api/v1/users/plans/${id}`,  
+      cancel_job_submit:(jobId)=> `api/v1/customer/jobs/${jobId}/cancel-job`,  
+      
      },
   
     version: {

@@ -75,14 +75,15 @@ const OngoingJobs = () => {
         showsVerticalScrollIndicator={false}
         renderItem={({item}) => (
           <TouchableOpacity
+          onPress={() => navigation.navigate('jobdetailsscreen',{jobId:item?.id})}
             style={[
               styles.cardContainer,
               {
                 backgroundColor: dark ? COLORS.dark2 : COLORS.white,
               },
             ]}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('productreviews')}
+            <View
+              // onPress={() => navigation.navigate('productreviews')}
               style={styles.detailsContainer}>
               <View>
                 <View
@@ -214,7 +215,7 @@ const OngoingJobs = () => {
                   ) : null}
                 </View>
               </View>
-            </TouchableOpacity>
+            </View>
             <View
               style={[
                 styles.separateLine,
@@ -246,7 +247,6 @@ const OngoingJobs = () => {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => navigation.navigate('trackorder')}
                 style={[
                   styles.receiptBtn,
                   {
@@ -368,7 +368,7 @@ const OngoingJobs = () => {
             style={styles.removeButton}
             onPress={() => {
               refRBSheet.current.close();
-              navigation.navigate('cancelorder');
+              navigation.navigate('cancelorder',{jobId:jobData?.id});
             }}
           />
         </View>

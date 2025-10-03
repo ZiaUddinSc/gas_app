@@ -215,3 +215,23 @@ export const formatDate = (dateStr: string) => {
   }
 };
 
+export const phoneNumberWithZero = (text) =>{
+  const index = text.indexOf('0');
+  if (index === -1) return text; // no zero found
+  return text.slice(0, index) + `(0)` + text.slice(index + 1);
+
+
+}
+
+export const removeZeroAndBracket = (phoneNumber: string) => {
+  // Remove brackets and spaces
+  const index = phoneNumber.indexOf('0');
+  if (index === -1) return phoneNumber; // no zero found
+  return phoneNumber.slice(0, index) + phoneNumber.slice(index + 1);
+}
+
+export const removeZeroFromFirstBracket=(str)=> {
+  // Check if it starts with (0
+ return  str.replace(/[()]/g, '');
+}
+
