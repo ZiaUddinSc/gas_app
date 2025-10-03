@@ -25,18 +25,13 @@ import {
   useFocusEffect,
 } from '@react-navigation/native';
 import {COLORS, icons, images, SIZES} from '../constants';
-import SettingsItem from '../components/SettingsItem';
 import Button from '../components/Button';
 import ButtonFilled from '../components/ButtonFilled';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {async} from 'validate.js';
 import AddressItem from '../components/CustomerAddressCard';
 // import Colors from '../src/theme/Colors';
 import ProfileAvatorView from '../components/ProfileAvatorView';
-import {getInitials} from '../helper/customMethods';
+import {getInitials,capitalizeWords,removeZeroAndBracket,phoneNumberWithZero} from '../helper/customMethods';
 import {GetSignleCustomer} from '../helper/GetApiHelper';
-import { capitalizeWords } from '../helper/customMethods';
-
 type Nav = {
   navigate: (value: string) => void;
 };
@@ -232,7 +227,8 @@ const CustomerDetails = ({route}) => {
             {customer?.contact?.mobile ? (
               <TouchableOpacity
                 onPress={() =>
-                  Linking.openURL(`tel:${customer?.contact?.mobile}`)
+                  
+                  Linking.openURL(`tel:${removeZeroAndBracket(customer?.contact?.mobile)}`)
                 }
                 style={[
                   styles.cancelBtn,
@@ -247,14 +243,15 @@ const CustomerDetails = ({route}) => {
                       color: dark ? COLORS.white : COLORS.primary,
                     },
                   ]}>
-                  {customer?.contact?.mobile}
+                  {phoneNumberWithZero(customer?.contact?.mobile)}
                 </Text>
               </TouchableOpacity>
             ) : null}
             {customer?.contact?.phone ? (
               <TouchableOpacity
                 onPress={() =>
-                  Linking.openURL(`tel:${customer?.contact?.phone}`)
+                  // alert(removeZeroAndBracket(customer?.contact?.phone))
+                  Linking.openURL(`tel:${removeZeroAndBracket(customer?.contact?.phone)}`)
                 }
                 style={[
                   styles.receiptBtn,
@@ -264,7 +261,7 @@ const CustomerDetails = ({route}) => {
                   },
                 ]}>
                 <Text style={styles.receiptBtnText}>
-                  {customer?.contact?.phone}
+                  {phoneNumberWithZero(customer?.contact?.phone)}
                 </Text>
               </TouchableOpacity>
             ) : null}
@@ -282,6 +279,7 @@ const CustomerDetails = ({route}) => {
               onPress={() =>
                 navigation.navigate('selectshippingaddress', {
                   customerId: customerId,
+                  navigateScreen:'updateaddressscreen'
                 })
               }>
               <Text
@@ -430,8 +428,10 @@ const CustomerDetails = ({route}) => {
           onPress={() => navigation.navigate('createnewjob')}
           style={styles.button}
         />
+        
       </View>
-      <RBSheet
+     
+      {/* <RBSheet
         ref={refRBSheet}
         closeOnPressMask={true}
         height={SIZES.height * 0.8}
@@ -480,17 +480,8 @@ const CustomerDetails = ({route}) => {
             textColor={dark ? COLORS.white : COLORS.primary}
             onPress={() => refRBSheet.current.close()}
           />
-          {/* <ButtonFilled
-            title="Yes, Logout"
-            style={styles.logoutButton}
-            onPress={() => 
-            {
-              refRBSheet.current.close();
-              logout()
-            }}
-          /> */}
         </View>
-      </RBSheet>
+      </RBSheet> */}
     </SafeAreaView>
   );
 };

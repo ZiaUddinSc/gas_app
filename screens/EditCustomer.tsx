@@ -19,8 +19,9 @@ import React, {
   useRef,
 } from 'react';
 import {COLORS, SIZES, FONTS, icons, images, illustrations} from '../constants';
+import MessageModal from '../components/MessageModal';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {getInitials} from '../helper/customMethods';
+import {getInitials,phoneNumberWithZero,removeZeroAndBracket} from '../helper/customMethods';
 import {CustomerUpdateReducer} from '../utils/reducers/formReducers';
 import {validateInput} from '../utils/actions/formActions';
 import ProfileAvatorView from '../components/ProfileAvatorView';
@@ -43,7 +44,7 @@ import {GetSignleCustomer} from '../helper/GetApiHelper';
 import {CustomerUpdate,CustomerContactInfoUpdate} from '../helper/CustomerHelper';
 import RNPickerSelect from 'react-native-picker-select';
 import { getISO2FromCallingCode } from '../utils/mapCountryCodeToISO2';
-import { capitalizeWords,parseFullNumber } from '../helper/customMethods';
+import { capitalizeWords,parseFullNumber,removeZeroFromFirstBracket } from '../helper/customMethods';
 
 const isTestMode = true;
 
@@ -104,7 +105,8 @@ const EditCustomer = ({route}) => {
   const [mobileNo, setMobileNo] = useState<string>('');
   const mobilePhoneInput = useRef<PhoneInput>(null);
   const phoneInputRef = useRef<PhoneInput>(null);
-
+  const [message, setMessage] = useState("");
+  const [modelOpen, setModelOpen] = useState(false);
   const [lookupAddress, setLookupAddress] = useState({
     address_line_1: '',
     address_line_2: '',
@@ -116,6 +118,7 @@ const EditCustomer = ({route}) => {
     longitude: null,
   });
   const [initialValues, setInitialValues] = useState({
+    id:'',
     address_line_1: '',
     address_line_2: '',
     city: '',
@@ -151,6 +154,14 @@ const EditCustomer = ({route}) => {
 
     return constraints;
   };
+
+  
+const handlePhoneChange = (text) =>{
+  let phoneNo = phoneNumberWithZero(text)
+  alert(phoneNo)
+  setPhoneNo(phoneNo)
+  setPhoneFormattedValue(phoneNo)
+}
   useFocusEffect(
     useCallback(() => {
       // fetchTitle();
@@ -198,16 +209,20 @@ const EditCustomer = ({route}) => {
         formIsValid: true, // optional, compute based on validities
       });
       if (customerData?.contact?.phone) {
-       
         let {iso2,localNumber} = parseFullNumber(customerData?.contact?.phone)
         setCountryCode(iso2)
-        setPhoneNo(localNumber)
+
+        let phoneNo = phoneNumberWithZero(localNumber)
+        setPhoneNo(phoneNo)
         // alert(getISO2FromFullNumber(customerData?.contact?.phone))
       }
       if (customerData?.contact?.mobile) {
+       
         let {iso2,localNumber} = parseFullNumber(customerData?.contact?.mobile)
         setMobileCountryCode(iso2)
-        setMobileNo(localNumber)
+
+        let mobileNo = phoneNumberWithZero(localNumber)
+        setMobileNo(mobileNo)
       }
     }
     setLoading(false);
@@ -242,13 +257,13 @@ const EditCustomer = ({route}) => {
   };
 
   const handleUpdateCustomer = async () => {
+   
     const constraints = getPageConstraints();
     const currentPageInputs = {
       fullName: formState.inputValues.fullName,
       email: formState.inputValues.email, // 👈 add this
       addressLookup: lookupAddress ? lookupAddress.state : '',
     };
-
     // Validate
     const errors: any = {};
     Object.keys(constraints).forEach(key => {
@@ -292,23 +307,24 @@ const EditCustomer = ({route}) => {
       // email: formState.inputValues.email,
     };
     const res = await CustomerUpdate(customerId, customerPayload);
+
     if (res.success) {
-      let contactInfo ={
-        "mobile": formattedValue,
-        "phone": phoneFormattedValue,
-        "email":  formState.inputValues.email,
-    }
+      
       if(formattedValue || phoneFormattedValue || formState.inputValues.email){
+        let contactInfo ={
+          "mobile": removeZeroFromFirstBracket(formattedValue),
+          "phone": removeZeroFromFirstBracket(phoneFormattedValue),
+          "email":  formState.inputValues.email,
+       }
         const result = await CustomerContactInfoUpdate(customer?.contact?.id, contactInfo);
       }
-      navigation.goBack()
-
-      Alert.alert(
-        'Success',
-        res?.data?.message || 'Customer data updated successfully',
-      );
+      setModelOpen(true)
+      setTimeout(()=>{
+        setModelOpen(false)
+        navigation.goBack()
+      },1500)
     } else {
-      Alert.alert('Update Failed', 'Please try again later.');
+      // Alert.alert('Update Failed', 'Please try again later.');
     }
   };
 
@@ -540,7 +556,7 @@ const EditCustomer = ({route}) => {
                 key={countryCode}
                 defaultValue={phoneNo}   // ✅ use defaultValue instead of value
                 ref={phoneInputRef}
-                // value={phoneNo} // just number
+                value={phoneNo} // just number
                 defaultCode={countryCode  ? countryCode :"GB" as  any} // set country code
                 layout="first"
                 onChangeText={text => {
@@ -652,6 +668,12 @@ const EditCustomer = ({route}) => {
           style={styles.button}
         />
       </View>
+      <MessageModal
+       open={modelOpen}
+       icon={icons.user}
+       heading='Success !'
+       title='Customer Updated Sucessfully.'
+      />
     </SafeAreaView>
   );
 };

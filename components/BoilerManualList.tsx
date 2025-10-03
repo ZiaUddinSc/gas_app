@@ -7,7 +7,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 type BoilerManualListProps = {
     onPress: () => void;
     title: string;
-    icon: any;
+    icon?: any;
     description?: string;
 };
 
@@ -23,6 +23,7 @@ const BoilerManualListItem: React.FC<BoilerManualListProps> = ({
         }]}
         onPress={onPress}
         >
+          {icon ?
           <View style={[styles.iconContainer]}>
              <Image
                     source={{ uri: icon }}
@@ -30,6 +31,8 @@ const BoilerManualListItem: React.FC<BoilerManualListProps> = ({
                     style={styles.image}
                 />
           </View>
+          :null
+          }
           <View>
             <Text style={[styles.notificationTitle, {
               color: dark ? COLORS.white : COLORS.greyscale900,

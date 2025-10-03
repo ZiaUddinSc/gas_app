@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, TextInput} from 'react-native';
+import {View, Text, StyleSheet, TextInput,Alert} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {ScrollView} from 'react-native-virtualized-view';
 import {COLORS, SIZES} from '../constants';
@@ -9,33 +9,55 @@ import ButtonFilled from '../components/ButtonFilled';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import ReasonItem from '../components/ReasonItem';
 import {GetData} from '../helper/CommonHelper';
+import {UpdateData} from '../helper';
 import Settings from '../config/settings';
+import { async } from 'validate.js';
 
-const CancelOrder = () => {
-  const navigation = useNavigation<NavigationProp<any>>();
+const CancelOrder = ({route}) => {
+  const navigation =useNavigation() as any;
   const {colors, dark} = useTheme();
   const [cancelReasons, setRancelReasons] = useState<any>([]);
+  const [selectedReason, setSelectedReason] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<any>([]);
+  const [note, setNote] = useState<string>('');
+  const jobId =route?.params?.jobId
   const fetchCancelJobs = async () => {
     let reasons = await GetData(`${Settings.endpoints.cancel_reasons}`);
     if (reasons?.data.length > 0) {
       setRancelReasons(reasons?.data);
     }
   };
-
   useEffect(() => {
     fetchCancelJobs();
   }, []);
+
+  const CancelJob = async()=>{
+    if(selectedReason){ 
+      let data={
+        status:3,
+        cancel_reason_id:selectedItem?.id,
+        cancel_reason_note:note
+       }
+       let update = await UpdateData(data,Settings.endpoints.cancel_job_submit(jobId))
+       if(update?.success){
+         navigation.replace('myjobs',{success:true})
+       }
+      }else{
+        Alert.alert("Info","Please Select Reason")
+      }
+    // alert(JSON.stringify(data))
+  }
   /***
    * Render content
    */
-  const handleCheckboxPress = (itemTitle: any) => {
-    if (selectedItem === itemTitle) {
+  const handleCheckboxPress = (item: any) => {
+    setSelectedItem(item)
+    if (selectedReason === item?.name) {
       // If the clicked item is already selected, deselect it
-      setSelectedItem(null);
+      setSelectedReason(null);
     } else {
       // Otherwise, select the clicked item
-      setSelectedItem(itemTitle);
+      setSelectedReason(item?.name);
     }
   };
 
@@ -103,7 +125,7 @@ const CancelOrder = () => {
         <ButtonFilled
           title="Submit"
           style={styles.submitBtn}
-          onPress={() => navigation.navigate('cancelorderpaymentmethods')}
+          onPress={() => CancelJob()}
         />
       </View>
     );
@@ -113,7 +135,7 @@ const CancelOrder = () => {
     <SafeAreaView style={[styles.area, {backgroundColor: colors.background}]}>
       <View style={[styles.container, {backgroundColor: colors.background}]}>
         <Header title="Cancel Job" />
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <View >
           <View style={{marginVertical: 12}}>
             <Text
               style={[
@@ -128,8 +150,8 @@ const CancelOrder = () => {
               {cancelReasons?.map((reason: any, index: number) => (
                 <ReasonItem
                   key={index}
-                  checked={selectedItem === reason.name}
-                  onPress={() => handleCheckboxPress(reason.name)}
+                  checked={selectedReason === reason.name}
+                  onPress={() => handleCheckboxPress(reason)}
                   title={reason.name}
                 />
               ))}
@@ -155,11 +177,13 @@ const CancelOrder = () => {
               placeholderTextColor={
                 dark ? COLORS.secondaryWhite : COLORS.greyscale900
               }
+              value={note}
+              onChangeText={(text)=>setNote(text)}
               multiline={true}
               numberOfLines={4} // Set the number of lines you want to display initially
             />
           </View>
-        </ScrollView>
+        </View>
       </View>
       {renderSubmitButton()}
     </SafeAreaView>
