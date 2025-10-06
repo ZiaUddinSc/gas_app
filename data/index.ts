@@ -425,25 +425,25 @@ export const callData = [
 export const banners = [
     {
         id: 1,
-        discount: '40%',
-        discountName: "Today's Special",
-        bottomTitle: 'Get a discount for every orde!',
-        bottomSubtitle: 'Only valid for today!'
+        discount: '30 Days',
+        discountName: "Invite a Gas Engineer →",
+        bottomTitle: '30 Days Free for them,30 Days for You',
+        bottomSubtitle: 'No limits: The more you invite, the more FREE time you unlock!'
     },
-    {
-        id: 2,
-        discount: '50%',
-        discountName: "Weekend Sale",
-        bottomTitle: 'Special discount for weekend orderings!',
-        bottomSubtitle: 'This weekend only!'
-    },
-    {
-        id: 3,
-        discount: '30%',
-        discountName: "Limited Time Offer",
-        bottomTitle: 'Hurry up! Limited time offer!',
-        bottomSubtitle: 'Valid until supplies last!'
-    }
+    // {
+    //     id: 2,
+    //     discount: '50%',
+    //     discountName: "Weekend Sale",
+    //     bottomTitle: 'Special discount for weekend orderings!',
+    //     bottomSubtitle: 'This weekend only!'
+    // },
+    // {
+    //     id: 3,
+    //     discount: '30%',
+    //     discountName: "Limited Time Offer",
+    //     bottomTitle: 'Hurry up! Limited time offer!',
+    //     bottomSubtitle: 'Valid until supplies last!'
+    // }
 ];
 
 export const categories = [
@@ -522,6 +522,97 @@ export const categories = [
     // }
 ];
 
+export const certificates = [
+
+    {
+        id: "0",
+        name: "All",
+        short_name: "All",
+        icon: icons.category,
+        iconColor: "rgba(51, 94, 247, 1)",
+        backgroundColor: "rgba(51, 94, 247, .12)",
+        onPress: null
+    },
+    {
+        id: "1",
+        name: "Customers",
+        icon: icons.landlord,
+        short_name: "CP12 Landlord",
+        iconColor: "rgba(51, 94, 247, 1)",
+        backgroundColor: "rgba(51, 94, 247, .12)",
+        onPress: "customers"
+    },
+    {
+        id: "2",
+        name: "Jobs",
+        short_name: "CP12 Homeowner",
+        icon: icons.homeowner,
+        iconColor: "rgba(255, 152, 31, 1)",
+        backgroundColor: "rgba(255, 152, 31, .12)",
+        onPress: "myjobs"
+    },
+    {
+        id: "3",
+        name: "Existing Records",
+        icon: icons.warning,
+        short_name: "CP14 Warning",
+        iconColor: "rgba(26, 150, 240, 1)",
+        backgroundColor: "rgba(26, 150, 240,.12)",
+        onPress: "categorytable"
+    },
+    {
+        id: "4",
+        name: "Maintainance",
+        short_name: "Maintainance",
+        icon: icons.maintenance,
+        iconColor: "rgba(255, 192, 45, 1)",
+        backgroundColor: "rgba(255, 192, 45,.12)",
+        onPress: "boilermanual"
+    },
+    {
+        id: "5",
+        name: "Gas Calculator",
+        icon: icons.breakdown,
+        short_name: "Breakdown",
+        iconColor: "rgba(245, 67, 54, 1)",
+        backgroundColor: "rgba(245, 67, 54,.12)",
+        onPress: "gascalculator"
+    },
+    {
+        id: "6",
+        name: "Gas Calculator",
+        icon: icons.commissioning,
+        short_name: "Commissioning",
+        iconColor: "rgba(245, 67, 54, 1)",
+        backgroundColor: "rgba(245, 67, 54,.12)",
+        onPress: "gascalculator"
+    },
+   
+    // {
+    //     id: "6",
+    //     name: "Cupboard",
+    //     icon: icons.cupboard1,
+    //     iconColor: "rgba(74, 175, 87, 1)",
+    //     backgroundColor: "rgba(74, 175, 87,.12)",
+    //     onPress: "categorycupboard"
+    // },
+    // {
+    //     id: "7",
+    //     name: "Vase",
+    //     icon: icons.vase1,
+    //     iconColor: "rgba(0, 188, 211, 1)",
+    //     backgroundColor: "rgba(0, 188, 211,.12)",
+    //     onPress: "categoryvase"
+    // },
+    // {
+    //     id: "8",
+    //     name: "Others",
+    //     icon: icons.more2,
+    //     iconColor: "rgba(114, 16, 255, 1)",
+    //     backgroundColor: "rgba(114, 16, 255, .12)",
+    //     onPress: null
+    // }
+];
 
 export const sofas = [
     {

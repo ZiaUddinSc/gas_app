@@ -353,6 +353,14 @@ const fire = require("../assets/icons/fire.png");
 const camera = require("../assets/icons/camera.png");
 const next = require("../assets/icons/next.png");
 const arrow_right = require("../assets/icons/left.png");
+const landlord = require("../assets/icons/landlord.png");
+const maintenance = require("../assets/icons/maintenance.png");
+
+const warning = require("../assets/icons/warning.png");
+const commissioning = require("../assets/icons/commissioning.png");
+const homeowner = require("../assets/icons/Homeowner.png");
+const breakdown = require("../assets/icons/breakdown.png");
+
 export default {
     addFileOutline,
     addFile,
@@ -708,5 +716,11 @@ export default {
     fire,
     camera,
     next,
-    arrow_right
+    arrow_right,
+    landlord,
+    maintenance,
+    homeowner,
+    warning,
+    commissioning,
+    breakdown
 }

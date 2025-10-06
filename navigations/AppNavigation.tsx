@@ -96,7 +96,13 @@ import {
   CustomerSelectScreen,
   DateTimePickerScreen,
   JobDetailsScreen,
-  CalendarScreen
+  CalendarScreen,
+  EditCompanyInfoScreen,
+  EditCompanyAddress,
+  EditContactDetailsScreen,
+  BankDetailsEditScreen,
+  EditRegisteredDetailsScreen,
+  NewCertificateList
 } from '../screens';
 import BottomTabNavigation from './BottomTabNavigation';
 
@@ -275,6 +281,12 @@ const AppNavigation = () => {
         <Stack.Screen name="datetimepickerscreen" component={DateTimePickerScreen} />
         <Stack.Screen name="jobdetailsscreen" component={JobDetailsScreen} />
         <Stack.Screen name="calendarscreen" component={CalendarScreen} /> 
+        <Stack.Screen name="editcompanyinfo" component={EditCompanyInfoScreen} />
+        <Stack.Screen name="editcompanyaddress" component={EditCompanyAddress} />
+        <Stack.Screen name="editcontactdetails" component={EditContactDetailsScreen} />
+        <Stack.Screen name="editbankdetails" component={BankDetailsEditScreen} />
+        <Stack.Screen name="editregistereddetails" component={EditRegisteredDetailsScreen} />
+        <Stack.Screen name="newcertificatelist" component={NewCertificateList} />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>

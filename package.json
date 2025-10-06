@@ -24,6 +24,7 @@
     "@react-navigation/native-stack": "^7.3.9",
     "@types/react-native-modern-datepicker": "^1.0.5",
     "axios": "^1.9.0",
+    "dayjs": "^1.11.18",
     "formik": "^2.4.6",
     "ky": "^1.8.0",
     "libphonenumber-js": "^1.12.23",

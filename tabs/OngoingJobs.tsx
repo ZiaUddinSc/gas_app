@@ -41,7 +41,7 @@ const OngoingJobs = () => {
   const fetchJobs = async () => {
     let jobs = await GetData(`${Settings.endpoints.get_jobs_list}`);
     if (jobs?.data.length > 0) {
-      console.log('jobs', jobs?.data);
+      console.log(jobs?.data);
       setJobs(jobs?.data);
     }
   };

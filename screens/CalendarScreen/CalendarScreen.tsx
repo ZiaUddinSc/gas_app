@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   SafeAreaView,
   View,
@@ -12,34 +12,27 @@ import {
   UIManager,
   Platform,
 } from 'react-native';
-
-import {Calendar} from 'react-native-calendars';
-import {icons} from '../../constants';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import dayjs from 'dayjs';
+import {Calendar, CalendarList} from 'react-native-calendars';
+import {COLORS, SIZES, icons} from '../../constants';
+import moment from 'moment';
+import JobCard from '../../components/JobCard';
 import styles from './styles';
 import Header from '../../components/Header';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../../theme/ThemeProvider';
-
+import {GetData} from '../../helper/CommonHelper';
+import Settings from '../../config/settings';
+import {getInitials} from '../../helper/customMethods';
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const agendaItems = {
-  '2025-10-03': [{id: '1', title: 'Team Meeting', time: '10:00 AM'}],
-  '2025-10-05': [{id: '2', title: 'Doctor Appointment', time: '2:00 PM'}],
-  '2025-10-10': [
-    {id: '3', title: 'Project Deadline', time: 'All Day'},
-    {id: '4', title: 'Lunch with Friend', time: '1:00 PM'},
-  ],
-};
+const agendaItems: Record<string, {id: string; title: string; time: string,customer:any,estimated_amount:number,thestatus:any}[]> =
+  {};
 const generateMonthDates = (year: number, month: number) => {
   const dates: string[] = [];
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -61,12 +54,122 @@ const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
   );
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [year, month] = selectedDate.split('-').map(Number);
+  const today = dayjs();
+  const [baseDate, setBaseDate] = useState(today);
 
-  const today = new Date();
-  const datesOfMonth = generateMonthDates(
-    today.getFullYear(),
-    today.getMonth(),
-  );
+  const getStartOfWeek = date => {
+    const day = date.day();
+    const diff = (day === 0 ? -6 : 1) - day; // Monday as start
+    return date.add(diff, 'day');
+  };
+
+  const generateWeeks = monthDate => {
+    const startOfMonth = monthDate.startOf('month');
+    const endOfMonth = monthDate.endOf('month');
+    const weeks = [];
+    let start = getStartOfWeek(startOfMonth);
+
+    while (start.isBefore(endOfMonth)) {
+      const week = Array.from({length: 7}, (_, i) =>
+        start.add(i, 'day').format('YYYY-MM-DD'),
+      );
+      weeks.push(week);
+      start = start.add(7, 'day');
+    }
+    return weeks;
+  };
+  const goToToday = () => {
+    const monthOfToday = today.startOf('month');
+    setBaseDate(monthOfToday);
+    const newWeeks = generateWeeks(monthOfToday);
+    setWeeks(newWeeks);
+    setSelectedDate(today.format('YYYY-MM-DD'));
+
+    const weekIndex = newWeeks.findIndex(week =>
+      week.includes(today.format('YYYY-MM-DD')),
+    );
+    if (weekIndex !== -1) {
+      setTimeout(() => {
+        flatListDatesRef.current.scrollToIndex({
+          index: weekIndex,
+          animated: true,
+        });
+      }, 50);
+    }
+  };
+  //   useEffect(() => {
+  //   // Scroll to the week containing today
+  //   const today = dayjs().format('YYYY-MM-DD');
+  //   const weekIndex = weeks.findIndex(week => week.includes(today));
+
+  //   if (weekIndex >= 0 && flatListDatesRef.current) {
+  //     flatListDatesRef.current.scrollToIndex({
+  //       index: weekIndex,
+  //       animated: false,
+  //       viewPosition: 0.5, // center week
+  //     });
+  //   }
+  // }, [weeks]);
+
+  const changeMonth = direction => {
+    const newMonth =
+      direction === 'next'
+        ? baseDate.add(1, 'month')
+        : baseDate.subtract(1, 'month');
+    setBaseDate(newMonth);
+    const newWeeks = generateWeeks(newMonth);
+    setWeeks(newWeeks);
+    flatListDatesRef.current.scrollToIndex({index: 0, animated: false});
+  };
+  const [weeks, setWeeks] = useState(generateWeeks(baseDate));
+
+  const fetchJobs = async () => {
+    let response = await GetData(`${Settings.endpoints.get_jobs_list}`);
+    if (response?.data.length > 0) {
+      let jobData = response?.data;
+      jobData.forEach(job => {
+        if (job.calendar && job.calendar.date) {
+          // Convert date to YYYY-MM-DD format
+          const parts = job.calendar.date.split('-'); // "05-10-2025" -> ["05","10","2025"]
+          const dateKey = `${parts[2]}-${parts[1].padStart(
+            2,
+            '0',
+          )}-${parts[0].padStart(2, '0')}`;
+
+          if (!agendaItems[dateKey]) {
+            agendaItems[dateKey] = [];
+          }
+
+          agendaItems[dateKey].push({
+            id: job.id.toString(),
+            title: job.description || 'No Title',
+            customer: job.customer,
+            thestatus:job.thestatus,
+            estimated_amount:job.estimated_amount || 0.0,
+            time: job.calendar.slot
+              ? `${job.calendar.slot.start} - ${job.calendar.slot.end}`
+              : 'All Day',
+          });
+        }
+      });
+    }
+  };
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+  // const datesOfMonth = generateMonthDates(
+  //   today.getFullYear(),
+  //   today.getMonth(),
+  // );
+  const datesOfMonth = React.useMemo(() => {
+    const selectedDateObj = new Date(selectedDate);
+    return generateMonthDates(
+      selectedDateObj.getFullYear(),
+      selectedDateObj.getMonth(),
+    );
+  }, [selectedDate]);
 
   // Generate marked dates for dots
   const markedDates: any = {};
@@ -79,78 +182,44 @@ const CalendarScreen = () => {
     selectedColor: '#00adf5',
   };
 
-  const eventsForSelectedDate = agendaItems[selectedDate] || [];
+  const eventsForSelectedDate = React.useMemo(() => {
+    return agendaItems[selectedDate] || [];
+  }, [selectedDate, agendaItems]);
 
-  const toggleCalendar = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpanded(!expanded);
+  type DateData = {
+    day: number;
+    month: number;
+    year: number;
+    timestamp: number;
+    dateString: string;
   };
 
   const onDayPress = (day: DateData) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    // update selected day
     setSelectedDate(day.dateString);
-    setExpanded(false);
-
-    // Scroll events list to top
+    const events = agendaItems[day.dateString] || [];
     scrollRef.current?.scrollToOffset({offset: 0, animated: true});
-
-    // Scroll collapsed date strip to center selected date
-    const index = datesOfMonth.indexOf(day.dateString);
+    setExpanded(!expanded)
+    // regenerate month strip for the selected month
+    const selected = new Date(day.dateString);
+    const monthDates = generateMonthDates(
+      selected.getFullYear(),
+      selected.getMonth(),
+    );
+    const index = monthDates.indexOf(day.dateString);
     if (index >= 0) {
       flatListDatesRef.current?.scrollToIndex({
         index,
         animated: true,
-        viewPosition: 0.5, // center the selected date
+        viewPosition: 0.5,
       });
     }
   };
 
-  const renderCollapsedDate = (date: string) => {
-    const dayNumber = new Date(date).getDate();
-    const isSelected = date === selectedDate;
-    const hasEvent = agendaItems[date] && agendaItems[date].length > 0;
-
-    return (
-      <TouchableOpacity
-        onPress={() => onDayPress({dateString: date} as DateData)}
-        style={[
-          styles.collapsedDate,
-          isSelected && {backgroundColor: '#00adf5'},
-        ]}>
-        <Text style={[styles.dateText, isSelected && {color: '#fff'}]}>
-          {dayNumber}
-        </Text>
-        {hasEvent && <View style={styles.dot} />}
-      </TouchableOpacity>
-    );
-  };
-
-  const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    };
-    return date.toLocaleDateString('en-US', options);
-  };
-
-  const formatWeekRange = (date: Date) => {
-    const startOfWeek = new Date(date);
-    startOfWeek.setDate(date.getDate() - date.getDay() + 1);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    const formatDateShort = (d: Date) =>
-      d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-
-    return `${formatDateShort(startOfWeek)} - ${formatDateShort(
-      endOfWeek,
-    )}, ${startOfWeek.getFullYear()}`;
-  };
-
   const renderTabBar = () => (
     <View style={styles.tabBar}>
-      {['List', 'Month', 'Week', 'Day'].map(tab => (
+      {['Month', 'Day'].map(tab => (
         <TouchableOpacity
           key={tab}
           style={[styles.tabItem, selectedTab === tab && styles.activeTabItem]}
@@ -167,195 +236,50 @@ const CalendarScreen = () => {
     </View>
   );
 
-  const renderMonthHeader = () => (
-    <View style={styles.monthHeader}>
-      <TouchableOpacity
-        onPress={() =>
-          setCurrentDate(prev => {
-            const date = new Date(prev);
-            date.setMonth(date.getMonth() - 1);
-            return date;
-          })
-        }>
-        {/* <ChevronLeft color="#777" size={wp(5)} /> */}
-        <Image source={icons.arrowLeft} style={{height: 16, width: 16}} />
-      </TouchableOpacity>
-      <Text style={styles.monthTitle}>
-        {currentDate.toLocaleDateString('en-US', {
-          month: 'long',
-          year: 'numeric',
-        })}
-      </Text>
-      <TouchableOpacity
-        onPress={() =>
-          setCurrentDate(prev => {
-            const date = new Date(prev);
-            date.setMonth(date.getMonth() + 1);
-            return date;
-          })
-        }>
-        <Image source={icons.arrowRight} style={{height: 16, width: 16}} />
-      </TouchableOpacity>
-      {/* <TouchableOpacity style={styles.todayButton} onPress={() => setCurrentDate(new Date())}>
-        <Text style={styles.todayText}>Today</Text>
-      </TouchableOpacity> */}
-    </View>
-  );
+  const onWeekDayPress = (date: string) => {
+    setSelectedDate(date);
 
-  const renderMonthView = () => (
-    <View>
-      <Calendar
-        style={styles.calendar}
-        current={currentDate.toISOString().split('T')[0]}
-        onDayPress={day => setCurrentDate(new Date(day.dateString))}
-        monthFormat={'MMMM yyyy'}
-        onMonthChange={month => setCurrentDate(new Date(month.dateString))}
-        firstDay={1}
-        markedDates={{
-          [currentDate.toISOString().split('T')[0]]: {
-            selected: true,
-            marked: true,
-            selectedColor: '#2089dc',
-          },
-        }}
-        theme={{
-          calendarBackground: '#f2f2f2',
-          dayTextColor: '#333',
-          textDisabledColor: '#d9e1e8',
-          monthTextColor: '#333',
-          arrowColor: '#2089dc',
-          textDayFontWeight: '300',
-          textMonthFontWeight: 'bold',
-          textDayHeaderFontWeight: '300',
-          textDayFontSize: hp(1.8),
-          textMonthFontSize: hp(2),
-          textDayHeaderFontSize: hp(1.6),
-        }}
-      />
-    </View>
-  );
-
-  const renderListView = () => (
-    <FlatList
-      data={Array.from({length: 10}, (_, i) => ({
-        id: i.toString(),
-        title: `Event ${i + 1}`,
-        date: new Date(),
-      }))}
-      keyExtractor={item => item.id}
-      renderItem={({item}) => (
-        <View style={styles.listItem}>
-          <Text style={styles.listItemTitle}>{item.title}</Text>
-          <Text style={styles.listItemDate}>
-            {item.date.toLocaleDateString()}
-          </Text>
-        </View>
-      )}
-    />
-  );
-
-  const renderWeekHeader = () => (
-    <View style={styles.weekHeader}>
-      <TouchableOpacity
-        onPress={() =>
-          setCurrentDate(prev => {
-            const date = new Date(prev);
-            date.setDate(date.getDate() - 7);
-            return date;
-          })
-        }>
-        <Image source={icons.arrowLeft} style={{height: 16, width: 16}} />
-      </TouchableOpacity>
-      <Text style={styles.weekTitle}>{formatWeekRange(currentDate)}</Text>
-      <TouchableOpacity
-        onPress={() =>
-          setCurrentDate(prev => {
-            const date = new Date(prev);
-            date.setDate(date.getDate() + 7);
-            return date;
-          })
-        }>
-        {/* <ChevronRight color="#777" size={wp(5)} /> */}
-        <Image source={icons.arrowRight} style={{height: 16, width: 16}} />
-      </TouchableOpacity>
-      {/* <TouchableOpacity style={styles.todayButton} onPress={() => setCurrentDate(new Date())}>
-        <Text style={styles.todayText}>Today</Text>
-      </TouchableOpacity> */}
-    </View>
-  );
-
-  const renderWeekView = () => (
-    <ScrollView style={styles.dayView}>
-      {renderWeekHeader()}
-      <View style={styles.dayTimeline}>
-        {Array.from({length: 20}, (_, i) => (
-          <Text key={i} style={styles.timeLabel}>{`${i + 4} AM`}</Text>
-        ))}
-      </View>
-      <ScrollView horizontal style={styles.weekDays}>
-        {Array.from({length: 7}, (_, i) => {
-          const day = new Date(currentDate);
-          day.setDate(currentDate.getDate() - currentDate.getDay() + 1 + i);
-          const isToday = day.toDateString() === new Date().toDateString();
-          const isSelected = day.toDateString() === currentDate.toDateString();
-          return (
-            <TouchableOpacity
-              key={i}
+    // Find the week index containing this date
+    const weekIndex = weeks.findIndex(week => week.includes(date));
+    if (weekIndex >= 0 && flatListDatesRef.current) {
+      flatListDatesRef.current.scrollToIndex({
+        index: weekIndex,
+        animated: true,
+        viewPosition: 0.5, // center the week
+      });
+    }
+  };
+  const renderWeek = ({item}) => (
+    <View style={styles.weekRow}>
+      {item.map(date => {
+        const isSelected = date === selectedDate;
+        const day = dayjs(date);
+        const hasEvent = agendaItems[date] && agendaItems[date].length > 0;
+        return (
+          <TouchableOpacity
+            key={date}
+            onPress={() => onWeekDayPress(date)}
+            style={[styles.dayContainer]}>
+          <View >    
+            <Text
+              style={[styles.dayText, isSelected && styles.selectedDayText]}>
+              {day.format('dd')}
+            </Text>
+            </View>
+            <View
               style={[
-                styles.weekDayColumn,
-                isSelected && styles.selectedDayColumn,
-              ]}
-              onPress={() => setCurrentDate(day)}>
+                styles.weekDate,
+                isSelected && {borderRadius: 20, backgroundColor: COLORS.black},
+              ]}>
               <Text
-                style={[
-                  styles.dayOfWeek,
-                  isToday && styles.todayText,
-                  isSelected && styles.selectedDayText,
-                ]}>
-                {day.toLocaleDateString('en-US', {weekday: 'short'})}
+                style={[styles.dateText, isSelected && {color: COLORS.white}]}>
+                {day.format('D')}
               </Text>
-              <Text
-                style={[
-                  styles.dayOfMonth,
-                  isToday && styles.todayText,
-                  isSelected && styles.selectedDayText,
-                ]}>
-                {day.getDate()}
-              </Text>
-              {/* Add events for the day here */}
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-    </ScrollView>
-  );
-
-  const renderDayHeader = () => (
-    <View style={styles.dayHeader}>
-      <TouchableOpacity
-        onPress={() =>
-          setCurrentDate(prev => {
-            const date = new Date(prev);
-            date.setDate(date.getDate() - 1);
-            return date;
-          })
-        }>
-        <Image source={icons.arrowLeft} style={{height: 16, width: 16}} />
-      </TouchableOpacity>
-      <Text style={styles.dayTitle}>{formatDate(currentDate)}</Text>
-      <TouchableOpacity
-        onPress={() =>
-          setCurrentDate(prev => {
-            const date = new Date(prev);
-            date.setDate(date.getDate() + 1);
-            return date;
-          })
-        }>
-        <Image source={icons.arrowRight} style={{height: 16, width: 16}} />
-      </TouchableOpacity>
-      {/* <TouchableOpacity style={styles.todayButton} onPress={() => setCurrentDate(new Date())}>
-        <Text style={styles.todayText}>Today</Text>
-      </TouchableOpacity> */}
+              {hasEvent && <View style={styles.dot} />}
+            </View>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 
@@ -363,71 +287,144 @@ const CalendarScreen = () => {
     <ScrollView style={styles.dayView}>
       <View style={{flex: 1, padding: 16}}>
         {expanded ? (
-          <Calendar
-            current={selectedDate} // <-- ensures calendar shows the selected date's month
-            markingType={'multi-dot'}
-            markedDates={{
-              ...markedDates,
-              [selectedDate]: {selected: true, selectedColor: '#00adf5'},
-            }}
-            onDayPress={onDayPress}
-            theme={{
-              selectedDayBackgroundColor: '#00adf5',
-              todayTextColor: '#00adf5',
-              dotColor: '#00adf5',
-              selectedDotColor: '#ffffff',
-            }}
-          />
-        ) : (
-          <>
+          <View>
+            <View style={styles.headerRow}>
+              <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+                <Text style={styles.headerText}>
+                  {baseDate.format('MMMM YYYY')}
+                </Text>
+              </TouchableOpacity>
+             
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                }}>
+                <TouchableOpacity onPress={() => changeMonth('prev')}>
+                  <Image
+                    source={icons.arrow_right}
+                    style={{height: 30, width: 30,tintColor:'#007AFF'}}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.todayButtonContainer}
+                  onPress={goToToday}>
+                  <Text style={styles.todayButton}>Today</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => changeMonth('next')}>
+                  <Image source={icons.next} style={{height: 30, width: 30,tintColor:'#007AFF'}} />
+                </TouchableOpacity>
+              </View>
+            </View>
+            
             <FlatList
+              style={{
+                // borderColor: "#CBCBCB",
+                // borderTopWidth: 0.5,
+                // borderLeftWidth: 0.2,
+                // borderRightWidth: 0.2,
+              }}
               ref={flatListDatesRef}
+              data={weeks}
               horizontal
+              pagingEnabled
               showsHorizontalScrollIndicator={false}
-              data={datesOfMonth}
-              keyExtractor={item => item}
-              renderItem={({item}) => renderCollapsedDate(item)}
-              contentContainerStyle={{paddingVertical: 8}}
-            />
-            <TouchableOpacity
-              onPress={() => {
-                LayoutAnimation.configureNext(
-                  LayoutAnimation.Presets.easeInEaseOut,
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={renderWeek}
+              onMomentumScrollEnd={e => {
+                const index = Math.round(
+                  e.nativeEvent.contentOffset.x / SIZES.width,
                 );
-                setExpanded(!expanded);
-              }}>
-              <View style={styles.dragHandle} />
-            </TouchableOpacity>
-          </>
-        )}
-
-        {/* Events List */}
-        <FlatList
+                if (weeks[index]) {
+                  const newWeekStart = dayjs(weeks[index][0]);
+                  setBaseDate(newWeekStart);
+                }
+              }}
+            />
+            <View style={styles.selectedDateView}>
+                <Text style={{fontSize:16,fontWeight:'700'}}>
+                {moment(selectedDate).format('D ddd MMM YYYY')}
+                </Text>
+            </View>
+            <FlatList
           ref={scrollRef}
           style={{marginTop: 16}}
-          data={eventsForSelectedDate}
-          keyExtractor={item => item.id}
+          data={eventsForSelectedDate.length > 0 ? [eventsForSelectedDate] : []}
+          keyExtractor={() => selectedDate} // only one row for the day
           renderItem={({item}) => {
             const eventDate = new Date(selectedDate);
             const dayName = eventDate.toLocaleDateString('en-US', {
               weekday: 'short',
             });
-            const dayNumber = eventDate.getDate();
-
             return (
-              <View style={styles.eventRow}>
-                {/* Left side: week and date vertically */}
-                <View style={styles.leftDate}>
-                  <Text style={styles.dayText}>{dayName}</Text>
-                  <Text style={styles.dateText}>{dayNumber}</Text>
-                </View>
-
-                {/* Right side: event card */}
-                <View style={styles.card}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.time}>{item.time}</Text>
-                </View>
-              </View>
+              <JobCard
+              />
+              // <View style={styles.eventRow}>
+              //   {/* Right side: all events for that day */}
+              //   <View style={[styles.card]}>
+              //     {item.map((event: any, index: number) => (
+              //       <>
+              //       <View style={{flexDirection:'row',width:'5%',justifyContent:'space-between'}}>   
+              //       <View style={[styles.leftLine, { backgroundColor: "white" }]} />
+              //       </View>
+              //       <View style={{width:'95%'}}> 
+              //         <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+              //           <View>
+              //           <Text>Job Name</Text>
+              //           </View>
+              //           <View style={{marginRight:10}}>
+              //             <Text style={{textAlign:'center'}}>£70</Text>
+              //             <Text style={{textAlign:'center'}}>7:00AM</Text>
+              //           </View>
+              //         </View>
+              //         <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+              //         <View
+              //             style={[
+              //               styles.userImg,
+              //               {
+              //                 backgroundColor: dark ? COLORS.white : COLORS.black,
+              //                 justifyContent: 'center',
+              //                 alignItems: 'center',
+              //               },
+              //             ]}>
+              //             <Text style={{fontSize:20, color: dark ? COLORS.black : COLORS.white}}>
+              //               {getInitials("item?.customer?.full_name")}
+              //             </Text>
+              //         </View>
+                      
+              //         {/* <View
+              //             style={[
+              //               styles.userImg,
+              //               {
+              //                 backgroundColor: dark ? COLORS.white : COLORS.black,
+              //                 justifyContent: 'center',
+              //                 alignItems: 'center',
+              //               },
+              //             ]}>
+              //             <Text style={{fontSize:20, color: dark ? COLORS.black : COLORS.white}}>
+              //               {getInitials("item?.customer?.full_name")}
+              //             </Text>
+              //         </View> */}
+                      
+              //         {/* <View key={event.id} style={{marginBottom: 8}}>
+              //           <Text style={styles.title}>{"Event Title"}</Text>
+              //           <Text style={styles.time}>{event.time}</Text>
+              //           {index < item.length - 1 && (
+              //             <View style={styles.separator} />
+              //           )}
+              //         </View> */}
+              //         </View>
+                  
+              //       <View style={{flexDirection:'row',width:'100%', justifyContent:'space-between'}}>
+              //         <Text>Job Name</Text>
+              //         <Text>£70</Text>
+              //       </View>
+              //       </View>
+              //       </>
+              //     ))}
+              //   </View>
+              // </View>
             );
           }}
           ListEmptyComponent={() => (
@@ -436,6 +433,47 @@ const CalendarScreen = () => {
             </Text>
           )}
         />
+          </View>
+        ) : (
+          <>
+            <Calendar
+              current={selectedDate} // <-- ensures calendar shows the selected date's month
+              markingType={'multi-dot'}
+              markedDates={{
+                ...markedDates,
+                [selectedDate]: {selected: true, selectedColor: COLORS.black},
+              }}
+              onDayPress={onDayPress}
+              theme={{
+                selectedDayBackgroundColor: '#00adf5',
+                todayTextColor: '#00adf5',
+                dotColor: '#00adf5',
+                selectedDotColor: '#ffffff',
+              }}
+            />
+
+            {/* <FlatList
+              ref={flatListDatesRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={datesOfMonth}
+              keyExtractor={item => item}
+              renderItem={({item}) => renderCollapsedDate(item)}
+              contentContainerStyle={{paddingVertical: 8}}
+            /> */}
+          </>
+        )}
+        <TouchableOpacity
+          onPress={() => {
+            LayoutAnimation.configureNext(
+              LayoutAnimation.Presets.easeInEaseOut,
+            );
+            setExpanded(!expanded);
+          }}>
+          <View style={styles.dragHandle} />
+        </TouchableOpacity>
+        {/* Events List */}
+        
       </View>
     </ScrollView>
   );
@@ -446,13 +484,7 @@ const CalendarScreen = () => {
       <View style={[styles.container, {backgroundColor: colors.background}]}>
         <Header title="Calendar" />
 
-        <View style={styles.content}>
-          {selectedTab === 'Month' && renderMonthView()}
-          {selectedTab === 'List' && renderListView()}
-          {selectedTab === 'Week' && renderWeekView()}
-          {selectedTab === 'Day' && renderDayView()}
-        </View>
-        {renderTabBar()}
+        <View style={styles.content}>{renderDayView()}</View>
       </View>
     </SafeAreaView>
   );

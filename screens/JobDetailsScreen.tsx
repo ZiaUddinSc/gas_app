@@ -284,8 +284,8 @@ const JobDetailsScreen = ({route}) => {
               </View>
               <View style={styles.callRightContainer}>
                 {jobData?.customer?.contact &&
-                (jobData?.customer?.contact.phone ||
-                  jobData?.customer?.contact.contact.mobile) ? (
+                (jobData?.customer?.contact?.phone ||
+                  jobData?.customer?.contact?.mobile) ? (
                   <TouchableOpacity
                     onPress={() => {
                       const numbers = [

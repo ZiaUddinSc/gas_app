@@ -98,6 +98,12 @@ import DateTimePickerScreen from "../components/DateTimePickerScreen";
 import CancelJobs from "../screens/CancelJobs";
 import JobDetailsScreen from "../screens/JobDetailsScreen";
 import CalendarScreen from "../screens/CalendarScreen/CalendarScreen";
+import EditCompanyInfoScreen from "../screens/EditCompanyInfoScreen";
+import EditCompanyAddress from "../screens/EditCompanyAddress";
+import EditContactDetailsScreen from "../screens/EditContactDetailsScreen";
+import BankDetailsEditScreen from "../screens/BankDetailsEditScreen";
+import EditRegisteredDetailsScreen from "../screens/EditRegisteredDetailsScreen";
+import NewCertificateList from "../screens/NewCertificateList";
 export {
     AddNewAddress,
     AddNewCard,
@@ -197,5 +203,11 @@ export {
     DateTimePickerScreen,
     CancelJobs,
     JobDetailsScreen,
-    CalendarScreen
+    CalendarScreen,
+    EditCompanyInfoScreen,
+    EditCompanyAddress,
+    EditContactDetailsScreen,
+    BankDetailsEditScreen,
+    EditRegisteredDetailsScreen,
+    NewCertificateList
 }

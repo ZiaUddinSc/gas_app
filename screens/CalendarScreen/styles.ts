@@ -3,7 +3,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {COLORS} from '../../constants';
+import {COLORS,SIZES} from '../../constants';
 
 const borderColor = '#ced4da';
 
@@ -25,6 +25,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: 17,
   },
+  separator: {
+    height: 1,
+    backgroundColor: '#CBCBCB',
+    marginVertical: 8,
+  },
   emptyDate: {
     height: 50,
     flex: 1,
@@ -37,7 +42,7 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
     backgroundColor: COLORS.white,
-    borderBottomWidth: 0.5,
+    borderBottomWidth:1,
     top:5,
     // borderBottomColor: Color.primaryBGColor,
     borderTopRightRadius: wp(2),
@@ -82,10 +87,12 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   todayButton: {
-    backgroundColor: '#00bcd4',
+    // backgroundColor: '#00bcd4',
     paddingVertical: hp(0.8),
     paddingHorizontal: wp(3),
-    borderRadius: wp(1),
+    color:'#007AFF',
+    fontSize:20
+    // borderRadius: wp(1),
   },
   todayText: {
     color: '#fff',
@@ -158,7 +165,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   selectedDayText: {
-    color: '#00bcd4',
+    color: '#007AFF',
   },
   // Day View Styles
   dayHeader: {
@@ -215,9 +222,9 @@ const styles = StyleSheet.create({
   },
   collapsedDate: {
     width: 40,
-    height: 40,
+    height: 4,
     marginHorizontal: 4,
-    borderRadius: 20,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -240,6 +247,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  weekDate:{
+    width: 40,
+    height:40,
+    // borderRadius:20,
+    // borderTopColor:'#CBCBCB',
+    // borderTopWidth:1,
+    justifyContent:'center',
+    alignItems:'center'
+  },
   title: { fontSize: 16, fontWeight: '600' },
   time: { fontSize: 14, color: '#555', marginTop: 2 },
   dragHandle: {
@@ -259,8 +275,58 @@ const styles = StyleSheet.create({
     width: 60, // fixed width for vertical day/date
     alignItems: 'center',
   },
-  dayText: { fontSize: 14, color: '#555' },
-  dateText: { fontSize: 14, fontWeight: '600', marginTop: 2 },
+  dayText: { fontSize: 18, color: '#555' },
+  dateText: { fontSize: 16, fontWeight: '600'},
+  weekRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: SIZES.width,
+    borderBottomColor:'#CBCBCB',
+    borderBottomWidth:1
+  },
+  dayContainer: {
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    width: 45,
+  },
+  weekDaysRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 4,
+  },
+  selectedDay: {
+    backgroundColor: '#00adf5',
+  },
+  headerRow: {
+    backgroundColor:'#F7F7F7',
+    borderTopRightRadius:15,
+    borderTopLeftRadius:15,
+    padding:10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomColor:'#CBCBCB',
+    borderBottomWidth:1
+    // marginHorizontal: 20,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+  selectedDateView:{
+    borderBottomColor:'#CBCBCB',
+    borderBottomWidth:1,
+    padding:10,
+    // marginLeft:10,
+  },
+  
+  todayButtonContainer: {
+    alignSelf: 'center',
+    margin: 8,
+  },
 });
 
 export default styles;
