@@ -293,7 +293,7 @@ const CompanySettings = () => {
           {/* Right side: 3-dot menu */}
           <TouchableOpacity onPress={() => setShowDropdown(prev => !prev)}>
             <Image
-              source={icons.moreHorizontal}
+              source={showDropdown ? icons.editPencil : icons.moreHorizontal}
               resizeMode="contain"
               style={[
                 styles.headerIcon,
@@ -311,14 +311,21 @@ const CompanySettings = () => {
               onPress={() => {
                 setShowDropdown(false);
                 // navigation.navigate('editcustomer', {customerId: customerId});
+
+                navigation.navigate('editcompanyinfo', {
+                  company: companyDetails.company,
+                });
               }}>
               <Text style={styles.dropdownText}>Company Information</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.dropdownItem}
               onPress={() => {
                 setShowDropdown(false);
-                // navigation.navigate('editcustomer', {customerId: customerId});
+                navigation.navigate('editcompanyaddress', {
+                  company: companyDetails.company,
+                });
               }}>
               <Text style={styles.dropdownText}>Compnay Address</Text>
             </TouchableOpacity>
@@ -326,7 +333,9 @@ const CompanySettings = () => {
               style={styles.dropdownItem}
               onPress={() => {
                 setShowDropdown(false);
-                // navigation.navigate('editcustomer', {customerId: customerId});
+                navigation.navigate('editcontactdetails', {
+                  company: companyDetails.company,
+                });
               }}>
               <Text style={styles.dropdownText}>Contact Details</Text>
             </TouchableOpacity>
@@ -334,7 +343,9 @@ const CompanySettings = () => {
               style={styles.dropdownItem}
               onPress={() => {
                 setShowDropdown(false);
-                // navigation.navigate('editcustomer', {customerId: customerId});
+                navigation.navigate('editbankdetails', {
+                  company: companyDetails.company,
+                });
               }}>
               <Text style={styles.dropdownText}>Bank Details</Text>
             </TouchableOpacity>
@@ -342,7 +353,9 @@ const CompanySettings = () => {
               style={styles.dropdownItem}
               onPress={() => {
                 setShowDropdown(false);
-                // navigation.navigate('editcustomer', {customerId: customerId});
+                navigation.navigate('editregistereddetails', {
+                  company: companyDetails.company,
+                });
               }}>
               <Text style={styles.dropdownText}>Registered Details</Text>
             </TouchableOpacity>

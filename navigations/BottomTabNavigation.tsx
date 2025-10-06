@@ -20,7 +20,7 @@ const items = [
   {
     label: 'New Certificate',
     icon: <Image source={Icon.icGoogle} width={15} height={15} />,
-    navigateScreen: '',
+    navigateScreen: 'newcertificatelist',
   },
 
   {
@@ -49,6 +49,10 @@ const BottomTabNavigation = () => {
   const refProfileSheet = useRef<any>(null);
   const navigation = useNavigation<NavigationProp<any>>();
 
+  const navigateNewScreen = (screen) =>{
+    refProfileSheet.current.close()
+    navigation.navigate(screen) 
+  }
 
   return (
     <>
@@ -335,7 +339,9 @@ const BottomTabNavigation = () => {
         />
         {items?.map((item: any, index: number) => (
           <TouchableOpacity
-            onPress={()=>item?.navigateScreen ? navigation.navigate(item?.navigateScreen) :{} }
+            onPress={()=>item?.navigateScreen ? 
+              navigateNewScreen(item?.navigateScreen) :
+              {} }
           >
             <Text
               style={[

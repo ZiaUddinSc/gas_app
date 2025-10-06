@@ -18,7 +18,13 @@ import {banners, categories, popularProducts} from '../data';
 import SubHeaderItem from '../components/SubHeaderItem';
 import Category from '../components/Category';
 import ProductCard from '../components/ProductCard';
-import {getGreeting,getUserFromStorage,User,capitalizeWords,getInitials} from '../helper/customMethods';
+import {
+  getGreeting,
+  getUserFromStorage,
+  User,
+  capitalizeWords,
+  getInitials,
+} from '../helper/customMethods';
 interface BannerItem {
   id: number;
   discount: string;
@@ -43,40 +49,46 @@ const Home = () => {
     fetchUser();
   }, []);
 
-
-  
-
-
   /**
    * Render header
    */
   const renderHeader = () => {
     return (
       <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.viewLeft}  onPress={() => navigation.navigate('profile')}>
-        { user?.photo ?
-          <Image
-            source={images.user1}
-            resizeMode="contain"
-            style={styles.userIcon}
-          />
-          :
-        <View style={[styles.fallback,styles.userIcon,
-          {backgroundColor:  dark ? COLORS.white : COLORS.greyscale900}
-        ]}
-       
-        >
-          <Text style={{
-              color: dark ? COLORS.greyscale900 : COLORS.white,
-               fontSize: 14,
-              fontWeight: 'bold',
-            }}>
-            {getInitials(user?.name)}
-          </Text>
-        </View>
-          }
+        <TouchableOpacity
+          style={styles.viewLeft}
+          onPress={() => navigation.navigate('profile')}>
+          {user?.photo ? (
+            <Image
+              source={images.user1}
+              resizeMode="contain"
+              style={styles.userIcon}
+            />
+          ) : (
+            <View
+              style={[
+                styles.fallback,
+                styles.userIcon,
+                {backgroundColor: dark ? COLORS.white : COLORS.greyscale900},
+              ]}>
+              <Text
+                style={{
+                  color: dark ? COLORS.greyscale900 : COLORS.white,
+                  fontSize: 14,
+                  fontWeight: 'bold',
+                }}>
+                {getInitials(user?.name)}
+              </Text>
+            </View>
+          )}
           <View style={styles.viewNameContainer}>
-            <Text style={[styles.greeeting,{ color: dark ? COLORS.white : COLORS.greyscale900,}]}>{greeting}</Text>
+            <Text
+              style={[
+                styles.greeeting,
+                {color: dark ? COLORS.white : COLORS.greyscale900},
+              ]}>
+              {greeting}
+            </Text>
             <Text
               style={[
                 styles.title,
@@ -190,7 +202,7 @@ const Home = () => {
                 color: dark ? COLORS.white : COLORS.black,
               },
             ]}>
-            {item.discount} OFF
+            Referral Special 🎉
           </Text>
           <Text
             style={[
@@ -202,25 +214,48 @@ const Home = () => {
             {item.discountName}
           </Text>
         </View>
-        <Text
-          style={[
-            styles.bannerDiscountNum,
-            {
-              color: dark ? COLORS.white : COLORS.black,
-            },
-          ]}>
-          {item.discount}
-        </Text>
+        <View>
+          <View
+            style={{
+              marginTop: -15,
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'row',
+            }}>
+            <Text
+              style={[
+                styles.bannerDiscountNum,
+                {
+                  color: dark ? COLORS.white : COLORS.black,
+                },
+              ]}>
+              {'30'}
+            </Text>
+            <Text style={{marginTop: 20, fontSize: 15}}> Days</Text>
+          </View>
+          <View style={{marginTop: -10}}>
+            <Text
+              style={[
+                {fontSize: 46},
+                styles.bannerFreeText,
+                {
+                  color: dark ? COLORS.white : COLORS.black,
+                },
+              ]}>
+              {'Free'}
+            </Text>
+          </View>
+        </View>
       </View>
       <View style={styles.bannerBottomContainer}>
         <Text
           style={[
-            styles.bannerBottomTitle,
+            styles.bannerBottomTitle,{marginTop:-20},
             {
               color: dark ? COLORS.white : COLORS.black,
             },
           ]}>
-          {item.bottomTitle}
+          {"Both get 30 days free"}
         </Text>
         <Text
           style={[
@@ -254,7 +289,8 @@ const Home = () => {
    */
   const renderBanner = () => {
     return (
-      <View
+      <TouchableOpacity
+      onPress={()=>alert("On Process")}
         style={[
           styles.bannerItemContainer,
           {
@@ -280,7 +316,7 @@ const Home = () => {
         <View style={styles.dotContainer}>
           {banners.map((_, index) => renderDot(index))}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -453,7 +489,7 @@ const styles = StyleSheet.create({
   fallback: {
     justifyContent: 'center',
     alignItems: 'center',
-     // dynamic bg
+    // dynamic bg
   },
   viewLeft: {
     flexDirection: 'row',
@@ -520,21 +556,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingTop: 28,
     borderRadius: 32,
-    backgroundColor: "red",
+    backgroundColor: 'red',
   },
   bannerTopContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    // alignItems: 'center',
   },
   bannerDicount: {
-    fontSize: 12,
-    fontFamily: 'Urbanist Medium',
+    fontSize: 20,
+    fontFamily: 'Urbanist Bold',
     color: COLORS.black,
     marginBottom: 4,
   },
   bannerDiscountName: {
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: 'Urbanist Bold',
     color: COLORS.black,
   },
@@ -543,11 +579,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Urbanist Bold',
     color: COLORS.black,
   },
+  bannerFreeText: {
+    fontSize: 46,
+    fontFamily: 'Urbanist Bold',
+    color: COLORS.black,
+  },
   bannerBottomContainer: {
     marginTop: 8,
   },
   bannerBottomTitle: {
-    fontSize: 14,
+    fontSize: 20,
     fontFamily: 'Urbanist Medium',
     color: COLORS.black,
   },
@@ -573,7 +614,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
     paddingBottom: 10,
     backgroundColor: COLORS.secondary,
-    height: 170,
+    height: 230,
     borderRadius: 32,
   },
   dotContainer: {
