@@ -44,7 +44,7 @@ const AddressViewItem: React.FC<AddressItemProps> = ({
                 <View>
                     <Text style={[styles.routeAddress, {
                         color: dark ? COLORS.grayscale200 : COLORS.grayscale700
-                    }]}>{address}{others}</Text>
+                    }]}>{address}{"\n"}{others}</Text>
                 </View>
             </View>
             {icon ?
@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
         // textAlign: "justify",
         // 👇 add these
         // flexShrink: 1,        // allow shrinking inside flex row
-        flexWrap: "wrap",     // wrap long text
-        width:'95%'
+        // flexWrap: "wrap",     // wrap long text
+        width:'100%'
         
     },
     leftContainer: {

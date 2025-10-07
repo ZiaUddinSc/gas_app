@@ -35,7 +35,7 @@ import {
   useNavigation,
   useFocusEffect,
 } from '@react-navigation/native';
-import AddressViewItem from '../components/AddressViewItem';
+import AddressItem from '../components/AddressViewItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GetCompanyDetails, GetSingleUser} from '../helper/GetApiHelper';
 import LottieLoader from '../components/LottieLoader';
@@ -77,15 +77,15 @@ const CompanySettings = () => {
   const [selectedArea, setSelectedArea] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [isVatRegisterEnabled, setIsVatRegisterEnabled] =
-    useState<boolean>(false);
+    useState<boolean>(companyDetails?.company?.vat_number !='' ? true : false);
   const [isDisplayCertificaterEnabled, setIsDisplayCertificaterEnabled] =
-    useState<boolean>(false);
+    useState<boolean>(companyDetails?.company?.display_company_name !='' ? true : false);
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [selectedGender, setSelectedGender] = useState('');
   const {dark} = useTheme();
 
   const [userInfo, setUserInfo] = useState();
-  const [companyDetails, setCompanyDetails] = useState();
+  const [companyDetails, setCompanyDetails] = useState({});
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -286,7 +286,7 @@ const CompanySettings = () => {
                 styles.headerTitle,
                 {color: dark ? COLORS.white : COLORS.greyscale900},
               ]}>
-              Customer Details
+              Company Details
             </Text>
           </TouchableOpacity>
 
@@ -532,18 +532,16 @@ const CompanySettings = () => {
             <View style={styles.viewAddreesContainer}>
               <View>
                 <View>
-                  <AddressViewItem
-                    onPress={
-                      () => {}
-                      // navigation.navigate('updateoccupiedaddress', {
-                      // address: item,
-                      // customerId: customerId,
-                      // })
-                    }
-                    address={companyDetails?.company?.full_address}
-                    // others={` London, EC1V 2NX `}
-                    icon={false}
-                  />
+                <AddressItem
+                  onPress={() => {}}
+                  address={`${capitalizeWords(companyDetails?.company?.company_address_line_1)}, ${
+                    companyDetails?.company?.company_address_line_2 !== null
+                      ? capitalizeWords(companyDetails?.company?.company_address_line_2) + ', '+capitalizeWords(companyDetails?.company?.company_city) 
+                      : ''
+                  }`}
+                  others={`${companyDetails?.company?.company_postal_code}`}
+                  icon={false}
+                />
                 </View>
               </View>
               {/* <View

@@ -24,13 +24,11 @@ import {validate} from 'validate.js';
 import {reducer} from '../utils/reducers/formReducers';
 import ButtonFilled from '../components/ButtonFilled';
 
-
 export default function CompanyInfoEditScreen({navigation, route}) {
   const {company} = route.params;
   const [form, setForm] = useState({
     ...company,
   });
-
 
   const {dark} = useTheme();
   const [companyName, setCompanyName] = useState(company.company_name || '');
@@ -209,6 +207,7 @@ export default function CompanyInfoEditScreen({navigation, route}) {
           <Text style={styles.label}>VAT Registered</Text>
           <Switch
             value={company.vat_registered != '' ? true : false}
+            thumbColor={company.vat_registered != '' ? 'green' : 'red'}
             onValueChange={setVatRegistered}
           />
         </View>
@@ -238,10 +237,16 @@ export default function CompanyInfoEditScreen({navigation, route}) {
         </View>
 
         <View style={styles.buttonRow}>
-         
-          <ButtonFilled onPress={() => navigation.goBack()} title={'Cancel'} style={{width:'40%',}}/>
-          <ButtonFilled onPress={onSave} title={'Save'}  style={{width:'40%',marginLeft:10}}/>
-         
+          {/* <ButtonFilled
+            onPress={() => navigation.goBack()}
+            title={'Cancel'}
+            style={{width: '40%'}}
+          /> */}
+          <ButtonFilled
+            onPress={onSave}
+            title={'Save'}
+            style={{width: '95%'}}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -271,7 +276,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
-  buttonRow: {flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16},
+  buttonRow: {
+    // flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems:'center',
+    marginTop: 16,
+  },
   cancelButton: {
     backgroundColor: '#f5f8fa',
     borderRadius: 8,
@@ -304,6 +314,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerLeft: {
+    padding:16,
     flexDirection: 'row',
     alignItems: 'center',
   },

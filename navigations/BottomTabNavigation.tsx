@@ -14,7 +14,7 @@ import {Cart, Home, Orders, UserProfileSettings, Wallet,CalendarScreen} from '..
 import Icon from '../src/theme/Icon';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import RBSheet from 'react-native-raw-bottom-sheet';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const Tab = createBottomTabNavigator();
 const items = [
   {
@@ -48,7 +48,7 @@ const BottomTabNavigation = () => {
   const {dark} = useTheme();
   const refProfileSheet = useRef<any>(null);
   const navigation = useNavigation<NavigationProp<any>>();
-
+  const insets = useSafeAreaInsets()
   const navigateNewScreen = (screen) =>{
     refProfileSheet.current.close()
     navigation.navigate(screen) 
@@ -61,12 +61,19 @@ const BottomTabNavigation = () => {
           headerShown: false,
           tabBarHideOnKeyboard: Platform.OS !== 'ios',
           tabBarStyle: {
+            // position: 'absolute',
+            // bottom: 0,
+            // right: 0,
+            // left: 0,
+            // elevation: 0,
+            // height: Platform.OS === 'ios' ? 90 : 60,
+            // backgroundColor: dark ? COLORS.dark1 : COLORS.white,
             position: 'absolute',
             bottom: 0,
             right: 0,
             left: 0,
             elevation: 0,
-            height: Platform.OS === 'ios' ? 90 : 60,
+            height: 60 + insets.bottom, 
             backgroundColor: dark ? COLORS.dark1 : COLORS.white,
           },
         }}>

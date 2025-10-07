@@ -102,7 +102,9 @@ import {
   EditContactDetailsScreen,
   BankDetailsEditScreen,
   EditRegisteredDetailsScreen,
-  NewCertificateList
+  NewCertificateList,
+  CP12LandLord,
+  ProfileUpdate
 } from '../screens';
 import BottomTabNavigation from './BottomTabNavigation';
 
@@ -287,6 +289,8 @@ const AppNavigation = () => {
         <Stack.Screen name="editbankdetails" component={BankDetailsEditScreen} />
         <Stack.Screen name="editregistereddetails" component={EditRegisteredDetailsScreen} />
         <Stack.Screen name="newcertificatelist" component={NewCertificateList} />
+        <Stack.Screen name="cp12landord" component={CP12LandLord} />
+        <Stack.Screen name="profileupdate" component={ProfileUpdate} />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>

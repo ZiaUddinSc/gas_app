@@ -190,16 +190,16 @@ export default function EditRegisteredDetailsScreen({navigation, route}) {
           value={regNoLegionella}
         />
 
-        <View style={styles.buttonRow}>
-          <ButtonFilled
+<View style={styles.buttonRow}>
+          {/* <ButtonFilled
             onPress={() => navigation.goBack()}
             title={'Cancel'}
             style={{width: '40%'}}
-          />
+          /> */}
           <ButtonFilled
             onPress={onSave}
             title={'Save'}
-            style={{width: '40%', marginLeft: 10}}
+            style={{width: '95%'}}
           />
         </View>
       </View>
@@ -223,7 +223,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 16,
   },
-  buttonRow: {flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16},
+  buttonRow: {
+    // flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems:'center',
+    marginTop: 16,
+  },
   cancelButton: {
     backgroundColor: '#f5f8fa',
     borderRadius: 8,
@@ -246,6 +251,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerLeft: {
+    padding:16,
     flexDirection: 'row',
     alignItems: 'center',
   },

@@ -1,8 +1,21 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { COLORS } from '../constants';
+import { getInitials } from '../helper/customMethods';
 
-const JobCard = () => {
+type JobDataProps = {
+    id: number;
+    jobName?: string;
+    customerName?: string;
+    JobAddress?: string;
+    dateString?: string;
+    jobStatus?:string
+    amount?:number
+    time?:string
+    others?:string
+  };
+
+const JobCard: React.FC<JobDataProps> = ({jobName,customerName,JobAddress,others,jobStatus,amount,time}) => {
   return (
     <View style={styles.card}>
       {/* Left Vertical Line */}
@@ -12,7 +25,7 @@ const JobCard = () => {
       <View style={styles.content}>
         {/* Top Row */}
         <View style={styles.headerRow}>
-          <Text style={styles.jobName}>Job Name</Text>
+          <Text style={styles.jobName}>{jobName}</Text>
           {/* <Text style={styles.price}>£70.00</Text> */}
         </View>
 
@@ -20,21 +33,22 @@ const JobCard = () => {
         <View style={styles.customerRow}>
           <View style={styles.avatar}
           >
-          <Text style={{color:'white',fontWeight:'700'}}>BS</Text>
+          <Text style={{color:'white',fontWeight:'700'}}>{getInitials(customerName)}</Text>
           </View>
           <View style={styles.customerInfo}>
-            <Text style={styles.customerName}>Customer Name</Text>
-            <Text style={styles.jobAddress}>Job Address</Text>
+            <Text style={styles.customerName}>{customerName}</Text>
+            <Text style={styles.jobAddress}>{JobAddress}</Text>
+            <Text style={styles.jobAddress}>{others}</Text>
           </View>
         </View>
       </View>
 
       {/* Right Section */}
       <View style={styles.rightSection}>
-      <Text style={styles.amount}>£70.00</Text>
-        <Text style={styles.time}>7:00 PM</Text>
+      <Text style={styles.amount}>£{amount? amount.toFixed(2) :'0.00'}</Text>
+        <Text style={styles.time}>{time}</Text>
         <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>Ongoing</Text>
+          <Text style={styles.statusText}>{jobStatus}</Text>
         </View>
       </View>
     </View>
