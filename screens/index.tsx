@@ -104,6 +104,8 @@ import EditContactDetailsScreen from "../screens/EditContactDetailsScreen";
 import BankDetailsEditScreen from "../screens/BankDetailsEditScreen";
 import EditRegisteredDetailsScreen from "../screens/EditRegisteredDetailsScreen";
 import NewCertificateList from "../screens/NewCertificateList";
+import CP12LandLord from "./CP12Form/CP12LandLord";
+import ProfileUpdate from "../screens/ProfileUpdate";
 export {
     AddNewAddress,
     AddNewCard,
@@ -209,5 +211,7 @@ export {
     EditContactDetailsScreen,
     BankDetailsEditScreen,
     EditRegisteredDetailsScreen,
-    NewCertificateList
+    NewCertificateList,
+    CP12LandLord,
+    ProfileUpdate
 }

@@ -27,7 +27,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../components/Header';
 import {reducer} from '../utils/reducers/formReducers';
 import {validateSignupInput} from '../utils/actions/formActions';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-toast-message';
@@ -43,16 +42,15 @@ import DatePickerModal from '../components/DatePickerModal';
 import Button from '../components/Button';
 import {useTheme} from '../theme/ThemeProvider';
 import ButtonFilled from '../components/ButtonFilled';
-import {UserSignUp, CompanUserUpdate} from '../helper/AuthHelper';
+import {UserSignUp} from '../helper/AuthHelper';
 
 import {
   useNavigation,
   useFocusEffect,
-  useRoute,
 } from '@react-navigation/native';
 import TouchableTextInput from '../components/TouchableTextInput';
-import KeyboardWrapper from '../components/KeyboardWrapper';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import { removeZeroFromFirstBracket } from '../helper/customMethods';
 const isTestMode = true;
 
 const initialFormState = {
@@ -360,7 +358,7 @@ const FillYourProfile = ({route}) => {
       name: formState.inputValues.fullName,
       email: formState.inputValues.email,
       // mobile: '0724762746',
-      mobile: phone,
+      mobile: removeZeroFromFirstBracket(phone),
       password: formState.inputValues.password,
       password_confirmation: formState.inputValues.confirmPassword,
       company_name: formState.inputValues.companyName,

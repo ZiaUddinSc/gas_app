@@ -360,6 +360,9 @@ const warning = require("../assets/icons/warning.png");
 const commissioning = require("../assets/icons/commissioning.png");
 const homeowner = require("../assets/icons/Homeowner.png");
 const breakdown = require("../assets/icons/breakdown.png");
+const appliance = require("../assets/icons/appliance.png");
+
+
 
 export default {
     addFileOutline,
@@ -722,5 +725,6 @@ export default {
     homeowner,
     warning,
     commissioning,
-    breakdown
+    breakdown,
+    appliance
 }

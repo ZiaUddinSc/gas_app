@@ -15,7 +15,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    padding: 16,
+    // paddingTop: 16,
+    // paddingLeft: 16,
     marginBottom: 90,
   },
   item: {
@@ -232,7 +233,6 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'blue',
     marginTop: 4,
   },
   card: {

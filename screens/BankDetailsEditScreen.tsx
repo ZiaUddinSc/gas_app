@@ -204,15 +204,15 @@ export default function BankDetailsEditScreen({navigation, route}) {
         />
 
         <View style={styles.buttonRow}>
-          <ButtonFilled
+          {/* <ButtonFilled
             onPress={() => navigation.goBack()}
             title={'Cancel'}
             style={{width: '40%'}}
-          />
+          /> */}
           <ButtonFilled
             onPress={onSave}
             title={'Save'}
-            style={{width: '40%', marginLeft: 10}}
+            style={{width: '95%'}}
           />
         </View>
       </View>
@@ -247,8 +247,9 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    // flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems:'center',
     marginTop: 16,
   },
   cancelButton: {
@@ -279,6 +280,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerLeft: {
+    padding:16,
     flexDirection: 'row',
     alignItems: 'center',
   },

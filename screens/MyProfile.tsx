@@ -26,7 +26,7 @@ import {
 } from 'react-native-image-picker';
 import {getFormatedDate} from 'react-native-modern-datepicker';
 import {useTheme} from '../theme/ThemeProvider';
-import { GetData } from '../helper/CommonHelper';
+import {GetData} from '../helper/CommonHelper';
 import {
   NavigationProp,
   useNavigation,
@@ -36,6 +36,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GetSignature} from '../helper/GetApiHelper';
 import Settings from '../config/settings';
+import {getInitials} from '../helper/customMethods';
 
 const isTestMode = true;
 
@@ -77,7 +78,7 @@ interface UserInfo {
   max_job_per_slot: string;
 }
 interface PackageInfo {
-   user?: any;
+  user?: any;
 }
 
 const MyProfile = () => {
@@ -95,15 +96,21 @@ const MyProfile = () => {
   const [userInfo, setUserInfo] = useState<UserInfo>({} as UserInfo);
   const [loading, setLoading] = useState(false);
   const [signature, setSignature] = useState(); // for popup modal
-  const [packageInfo, setPackageInfo] = useState<PackageInfo>({} as PackageInfo);
+  const [packageInfo, setPackageInfo] = useState<PackageInfo>(
+    {} as PackageInfo,
+  );
   const [signatureImage, setSignatureImage] = useState(null);
+
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const loadUserData = async () => {
     const userInfoString = await AsyncStorage.getItem('userInfo');
     if (userInfoString) {
       const parsedInfo: UserInfo = JSON.parse(userInfoString);
-      const res = await GetData(`${Settings.endpoints.user_plan_details(parsedInfo?.id)}`);
-      if(res?.data){
+      const res = await GetData(
+        `${Settings.endpoints.user_plan_details(parsedInfo?.id)}`,
+      );
+      if (res?.data) {
         setPackageInfo(res?.data);
       }
       setUserInfo(parsedInfo);
@@ -111,7 +118,6 @@ const MyProfile = () => {
   };
 
   useFocusEffect(
-    
     useCallback(() => {
       fetchSignature();
       loadUserData();
@@ -121,10 +127,7 @@ const MyProfile = () => {
     }, [route?.params?.signature]),
   );
 
-  useEffect(()=>{
-   
-
-  },[])
+  useEffect(() => {}, []);
 
   const fetchSignature = async () => {
     setLoading(true);
@@ -140,7 +143,7 @@ const MyProfile = () => {
     }
     setLoading(false);
   };
- 
+
   const genderOptions = [
     {label: 'Male', value: 'male'},
     {label: 'Female', value: 'female'},
@@ -253,11 +256,19 @@ const MyProfile = () => {
     return (
       <View style={styles.profileContainer}>
         <View>
-          <Image
-            source={userInfo.photo_url ? {uri: userInfo.photo_url} : image}
-            resizeMode="cover"
-            style={styles.avatar}
-          />
+          {userInfo.photo_url ? (
+            <Image
+              source={{uri: userInfo.photo_url}}
+              resizeMode="cover"
+              style={styles.avatar}
+            />
+          ) : (
+            <View
+              style={[styles.avatarContainer, {backgroundColor: COLORS.gray2}]}>
+              <Text style={{fontSize: 60}}>{getInitials(userInfo.name)}</Text>
+            </View>
+          )}
+
           <TouchableOpacity onPress={pickImage} style={styles.picContainer}>
             <Image
               source={icons.camera}
@@ -346,6 +357,95 @@ const MyProfile = () => {
     );
   }
 
+  const renderHeader = () => {
+    return (
+      <View>
+        <View style={styles.headerContainer}>
+          {/* Left side: Back button + Title */}
+          <TouchableOpacity
+            style={styles.headerLeft}
+            onPress={() => navigation.goBack()}>
+            <Image
+              source={icons.arrowLeft}
+              resizeMode="contain"
+              style={styles.logo}
+            />
+            <Text
+              style={[
+                styles.headerTitle,
+                {color: dark ? COLORS.white : COLORS.greyscale900},
+              ]}>
+              My Profile
+            </Text>
+          </TouchableOpacity>
+
+          {/* Right side: 3-dot menu */}
+          <TouchableOpacity onPress={() => setShowDropdown(prev => !prev)}>
+            <Image
+              source={showDropdown ? icons.editPencil : icons.moreHorizontal}
+              resizeMode="contain"
+              style={[
+                styles.headerIcon,
+                {tintColor: dark ? COLORS.secondaryWhite : COLORS.greyscale900},
+              ]}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Dropdown */}
+        {showDropdown && (
+          <View style={styles.topdropdown}>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+
+                navigation.navigate('profileupdate', {
+                  titelData: 'Personal Information',
+                });
+              }}>
+              <Text style={styles.dropdownText}>Personal Information</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                navigation.navigate('profileupdate', {
+                  titelData: 'Account Details',
+                });
+              }}>
+              <Text style={styles.dropdownText}>Account Details</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                navigation.navigate('SignatureScreen', {
+                  onSelect: signature => {
+                    setSignatureImage(signature); // Receive selected job
+                  },
+                });
+              }}>
+              <Text style={styles.dropdownText}>Signature</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                // navigation.navigate('editregistereddetails', {
+                //   company: companyDetails.company,
+                // });
+              }}>
+              <Text style={styles.dropdownText}>Subscriptions</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView
       style={[
@@ -357,7 +457,8 @@ const MyProfile = () => {
           styles.container,
           {backgroundColor: dark ? COLORS.dark1 : COLORS.white},
         ]}>
-        <Header title="My Profile" />
+        {/* <Header title="My Profile" /> */}
+        {renderHeader()}
         <ScrollView
           style={[
             styles.scrollView,
@@ -365,24 +466,6 @@ const MyProfile = () => {
           ]}
           showsVerticalScrollIndicator={false}>
           {renderProfile()}
-          {/* <View style={{alignItems: 'center', marginVertical: 12,height:200}}>
-            <View style={styles.avatarContainer}>
-              <Image
-                source={image === null ? images.user1 : image}
-                resizeMode="cover"
-                style={styles.avatar}
-              />
-              <TouchableOpacity onPress={pickImage} style={styles.pickImage}>
-                <MaterialCommunityIcons
-                  name="pencil-outline"
-                  size={24}
-                  color={COLORS.white}
-                />
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.title, { color: dark ? COLORS.secondaryWhite : COLORS.greyscale900 }]}>Nathalie Erneson</Text>
-
-          </View> */}
           <View
             style={[
               styles.summaryContainer,
@@ -442,29 +525,6 @@ const MyProfile = () => {
               </Text>
             </View>
           </View>
-          {/* <View
-            style={[
-              styles.summaryContainer,
-              {
-                backgroundColor: dark ? COLORS.dark2 : COLORS.white,
-                borderRadius: 6,
-              },
-            ]}>
-            <View style={styles.viewContainer}>
-             <View>
-              <Text style={styles.viewLeft}>Signature</Text>
-              
-              <View>
-                
-                <Image
-                    source={{uri:'https://app.gascertificate.app/storage/signatures/c455b021-2103-40fa-8097-e5f0c44f1f58.png'}}
-                    resizeMode="cover"
-                    style={styles.avatar}
-                />
-              </View>
-             </View> 
-            </View>
-          </View> */}
           <View
             style={[
               styles.summarySignatureContainer,
@@ -478,7 +538,7 @@ const MyProfile = () => {
               {signatureImage ? (
                 <Image
                   source={{uri: signatureImage}}
-                  resizeMode='contain'
+                  resizeMode="contain"
                   style={styles.signatureImage}
                 />
               ) : (
@@ -487,7 +547,7 @@ const MyProfile = () => {
                     <Image
                       source={{uri: signature.path}}
                       style={styles.signatureImage}
-                      resizeMode='contain'
+                      resizeMode="contain"
                     />
                   ) : (
                     <View style={styles.addSignature}>
@@ -515,7 +575,11 @@ const MyProfile = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                Monthly (£{packageInfo?.user?.userpackage ? packageInfo?.user?.userpackage?.price.toFixed(2) :'0.00'})
+                Monthly (£
+                {packageInfo?.user?.userpackage
+                  ? packageInfo?.user?.userpackage?.price.toFixed(2)
+                  : '0.00'}
+                )
               </Text>
             </View>
             <View style={styles.viewContainer}>
@@ -550,11 +614,12 @@ const MyProfile = () => {
                     },
                   ]}>
                   {/* Exp. : 12/2026 */}
-                  Exp. : 
-                  { packageInfo?.user?.userpackage?.end ?
-                   moment( packageInfo?.user?.userpackage?.end, "DD-MM-YYYY").add(1, "year").format("MM/YYYY"):
-                   "N/A"
-                   }
+                  Exp. :
+                  {packageInfo?.user?.userpackage?.end
+                    ? moment(packageInfo?.user?.userpackage?.end, 'DD-MM-YYYY')
+                        .add(1, 'year')
+                        .format('MM/YYYY')
+                    : 'N/A'}
                 </Text>
               </View>
             </View>
@@ -581,6 +646,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     marginVertical: 12,
     alignItems: 'center',
+    justifyContent: 'center',
     width: 130,
     height: 130,
     borderRadius: 65,
@@ -759,6 +825,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     // marginVertical: 12,
+  },
+  topdropdown: {
+    position: 'absolute',
+    top: 30, // just below header
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    elevation: 5, // shadow for Android
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    minWidth: 100,
+    zIndex: 1000,
+  },
+  dropdownItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  headerIcon: {
+    height: 24,
+    width: 24,
+    tintColor: COLORS.greyscale900,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    height: 32,
+    width: 32,
+    tintColor: COLORS.primary,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: 'Urbanist Bold',
+    color: COLORS.greyscale900,
+    marginLeft: 12,
   },
 });
 

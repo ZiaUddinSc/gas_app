@@ -540,7 +540,7 @@ export const certificates = [
         short_name: "CP12 Landlord",
         iconColor: "rgba(51, 94, 247, 1)",
         backgroundColor: "rgba(51, 94, 247, .12)",
-        onPress: "customers"
+        onPress: "cp12landord"
     },
     {
         id: "2",
