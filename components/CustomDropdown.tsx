@@ -41,7 +41,7 @@ const CustomDropdown: React.FC<ModalDropdownProps> = ({
         <Text style={[
           styles.label, 
           {color: dark ? COLORS.white : COLORS.gray2},
-          isFocus && {color: COLORS.primary}
+          isFocus && {color: dark ? COLORS.white : COLORS.primary}
         ]}>
           {label}
         </Text>
