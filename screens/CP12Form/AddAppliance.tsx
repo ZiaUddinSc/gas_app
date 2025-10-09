@@ -1,884 +1,1716 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useRef, useCallback, useReducer} from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
-  StyleSheet,
   TextInput,
-  SafeAreaView,
-  Platform,
-  StatusBar,
+  TouchableOpacity,
   ScrollView,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Switch,
+  Image,
+  Alert,
 } from 'react-native';
-import {ArrowLeft, ChevronDown} from 'lucide-react-native';
-import Color from '../../theme/Colors';
+import {Formik} from 'formik';
+import {
+  useNavigation,
+  NavigationProp,
+  useRoute,
+} from '@react-navigation/native';
+import RNPickerSelect from 'react-native-picker-select';
+import {reducer} from '../../utils/reducers/formReducers';
+import {commonStyles} from '../../styles/CommonStyles';
+import ButtonFilled from '../../components/ButtonFilled';
+import CustomRBSheetList from '../../components/CustomRBSheetList';
+// import {ArrowLeft, MapPin} from 'lucide-react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {useNavigation} from '@react-navigation/native';
-import CustomHeader from '../../components/CustomHeader/CustomHeader';
+import {useTheme} from '../../theme/ThemeProvider';
+import {COLORS, SIZES, FONTS, icons} from '../../constants';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import Header from '../../components/Header';
+import {CustomerJobAddressStore} from '../../helper/CustomerHelper';
+const initialFormState = {
+  inputValues: {
+    name: '',
+    company_registration: '',
+    vat_number: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  },
+  inputValidities: {
+    name: false,
+    company_registration: false,
+    vat_number: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  },
+  formIsValid: false,
+};
 
-const AddApplianceScreen = () => {
-  const [formData, setFormData] = useState({
-    location: null,
-    make: null,
-    model: '',
-    type: null,
-    serialNumber: '',
-    gcNumber: '',
-    operatingPressure: '',
-    flueType: null,
-    safetyDevices: null,
-    spillageTest: null,
-    smokePellet: null,
-    initalratio: '',
-    initalco: '',
-    initalco2: '',
-    finalratio: '',
-    finalco: '',
-    finalco2: '',
-    satisfactoryTermination: null,
-    flueVisualCondition: null,
-    adequateVentilation: null,
-    landlordAppliance: null,
-    inspected: null,
-    applianceVisualCheck: null,
-    applianceServiced: null,
-    applianceSafeUse: null,
-  });
-  const navigation = useNavigation();
+interface KeywordItemProps {
+  item: {
+    id: string;
+    name: string;
+  };
+  onPress: (id: string) => void;
+  selected: boolean;
+}
 
-  const dropdownOptions = {
-    location: [
-      {id: 1, name: 'Location A'},
-      {id: 2, name: 'Location B'},
-      {id: 3, name: 'Location C'},
-    ],
-    make: [
-      {id: 101, name: 'Make X'},
-      {id: 102, name: 'Make Y'},
-      {id: 103, name: 'Make Z'},
-    ],
-    type: [
-      {id: 301, name: 'Type P'},
-      {id: 302, name: 'Type Q'},
-      {id: 303, name: 'Type R'},
-    ],
-    flueType: [
-      {id: 401, name: 'Flue Type 1'},
-      {id: 402, name: 'Flue Type 2'},
-      {id: 403, name: 'Flue Type 3'},
-    ],
+const AddAppliance = ({route}) => {
+  const navigation = useNavigation<NavigationProp<any>>();
+  const [isCheckOccupiedDetails, setIsCheckOccupiedDetails] = useState(false);
+  const [phoneNo, setPhoneNo] = useState<string>('');
+  const [location, setLocation] = useState('');
+  const [makeData, setMakeData] = useState('');
+  const [typeData, seTypeData] = useState('');
+  const [formattedPhoneNo, setFormattedPhoneNo] = useState<string>('');
+  const [formState, dispatchFormState] = useReducer(reducer, initialFormState);
+  const customerId = route?.params?.customerId;
+  const job = route?.params?.job || false;
+  const {colors, dark} = useTheme();
+  const [relationValue, setRelationValue] = useState(null);
+  const refRBSheet = useRef<any>(null);
+  const refRBMakeSheet = useRef<any>(null);
+  const refRBTypeSheet = useRef<any>(null);
+  const sampleData = [
+    { id: 1, name: 'Beedroom' },
+    { id: 2, name: 'Bathroom' },
+    { id: 3, name: 'Boiler Room' },
+    { id: 4, name: 'Cellar' },
+    { id: 5, name: 'Compartment' },
+    { id: 6, name: 'Conservatory' },
+    { id: 7, name: 'Dining Room' },
+    { id: 8, name: 'Beedroom' },
+    { id: 9, name: 'Bathroom' },
+    { id: 10, name: 'Boiler Room' },
+    { id: 11, name: 'Cellar' },
+    { id: 12, name: 'Compartment' },
+    { id: 13, name: 'Conservatory' },
+    { id: 14, name: 'Dining Room' },
+    { id: 7, name: 'Dining Room' },
+    { id: 8, name: 'Beedroom' },
+    { id: 9, name: 'Bathroom' },
+    { id: 10, name: 'Boiler Room' },
+    { id: 11, name: 'Cellar' },
+    { id: 12, name: 'Compartment' },
+    { id: 13, name: 'Conservatory' },
+    { id: 14, name: 'Dining Room' },
+  ];
+
+  const makeDataList = [
+    { id: 1, name: 'ACV' },
+    { id: 2, name: 'AEG' },
+    { id: 3, name: 'ALpha' },
+  ];
+
+  const typeList = [
+    { id: 1, name: 'Boiler' },
+    { id: 2, name: 'Central Heating Boiler' },
+    { id: 3, name: 'Combination Boiler' },
+    { id: 3, name: 'Coker' },
+    { id: 4, name: 'Fire' },
+  ];
+
+  const onHandleLocationOpen = () => {
+    refRBSheet.current.open()
+  }
+  const onSelectLocation =(item)=>{
+    setLocation(item?.name)
+  } 
+
+  const navigateNewScreen = address => {
+    navigation.navigate('createnewjob', {
+      ...route.params,
+      address: address,
+      customerId: customerId,
+      job: job,
+      // selectedCustomer:selectedCustomer
+    });
   };
 
-  const booleanOptions = ['Yes', 'No', 'N/A'];
-  const testOptions = ['Pass', 'Fail', 'N/A'];
-
-  const openSearchableDropdown = (params: {
-    items: any[];
-    onSelect: (item: any) => void;
-    title: string;
-  }) => {
-    navigation.navigate('SelectItem', params);
-  };
-
-  const handleInputChange = (field: keyof typeof formData, value: any) => {
-    let newValue = value;
-    if (value === 'N/A') {
-      newValue = 'N/A';
-    }
-    setFormData(prev => ({...prev, [field]: value}));
-  };
-
-  const handleSave = useCallback(() => {
-    navigation.navigate('CP12Form', { applianceData: formData });
-}, [navigation, formData]);
+  const onHandleMakeOpen = () => {
+    refRBMakeSheet.current.open()
+  }
+  const onSelectMake =(item)=>{
+    setMakeData(item?.name)
+  } 
+  const onHandleTypeOpen = () => {
+    refRBTypeSheet.current.open()
+  }
+  const onSelectType =(item)=>{
+    seTypeData(item?.name)
+  } 
+  
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <CustomHeader
-        title="Add Appliance"
-        fontSize={hp(2.2)}
-        leftIcon={<ArrowLeft size={24} color="white" />}
-        onLeftPress={() => navigation.goBack()}
-      />
-      <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-        {/* Location Dropdown */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Location</Text>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() =>
-              openSearchableDropdown({
-                items: dropdownOptions.location,
-                onSelect: item => handleInputChange('location', item),
-                title: 'Locations',
-              })
-            }>
-            <Text style={styles.drop}>
-              {formData.location ? formData.location.name : 'Please Select'}
-            </Text>
-            <ChevronDown size={18} />
-          </TouchableOpacity>
+    <SafeAreaView style={[styles.area, {backgroundColor: colors.background}]}>
+      <View style={[styles.container, {backgroundColor: colors.background}]}>
+        <View style={{paddingLeft: 16}}>
+          <Header title="Add Appliance" />
         </View>
-
-        {/* Make Dropdown */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Make</Text>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() =>
-              openSearchableDropdown({
-                items: dropdownOptions.make,
-                onSelect: item => handleInputChange('make', item),
-                title: 'Makes',
-              })
-            }>
-            <Text style={[formData.make ? {color: '#222'} : {color: '#888'},styles.drop]}>
-              {formData.make ? formData.make.name : 'Please Select'}
-            </Text>
-            <ChevronDown size={18} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Model Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Model</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.model}
-            onChangeText={text => handleInputChange('model', text)}
-            placeholder="Models"
-            placeholderTextColor="#888"
-          />
-        </View>
-
-        {/* Type Dropdown */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Type</Text>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() =>
-              openSearchableDropdown({
-                items: dropdownOptions.type,
-                onSelect: item => handleInputChange('type', item),
-                title: 'Types',
-              })
-            }>
-            <Text style={styles.drop}>
-            {formData.type ? formData.type.name : 'Please Select'}
-            </Text>
-            <ChevronDown size={18} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Serial Number Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Serial Number</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.serialNumber}
-            onChangeText={text => handleInputChange('serialNumber', text)}
-            placeholder="Serial Number"
-            placeholderTextColor="#888"
-          />
-        </View>
-
-        {/* GC Number Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>GC Number</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.gcNumber}
-            onChangeText={text => handleInputChange('gcNumber', text)}
-            placeholder="GC Number"
-            placeholderTextColor="#888"
-          />
-        </View>
-
-        {/* Flue Type Dropdown */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Flue Type</Text>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() =>
-              openSearchableDropdown({
-                items: dropdownOptions.flueType,
-                onSelect: item => handleInputChange('flueType', item),
-                title: 'Flue Types',
-              })
-            }>
-            <Text style={styles.drop}>
-            {formData.flueType ? formData.flueType.name : 'Please Select'}
-            </Text>
-            <ChevronDown size={18} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Operating Pressure Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>
-            Operating Pressure (mbar) or Heat Input (KW/h) or (BTU/h)
-          </Text>
-          <TextInput
-            style={styles.input}
-            value={formData.operatingPressure}
-            onChangeText={text => handleInputChange('operatingPressure', text)}
-            placeholder="Operating Pressure"
-            placeholderTextColor="#888"
-          />
-        </View>
-
-        {/* Safety Devices Section */}
-        <View style={styles.simple_container}>
-          <Text style={styles.optiontitle}>Safety Devices</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
+        <ScrollView
+          contentContainerStyle={{
+            backgroundColor: dark ? COLORS.dark1 : COLORS.tertiaryWhite,
+            marginTop: 12,
+          }}
+          showsVerticalScrollIndicator={false}>
+          <View style={{margin: 20}}>
+            <View style={{marginTop: 0}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Location
+              </Text>
+              <CustomRBSheetList ref={refRBSheet} data={sampleData} onSelectItem={onSelectLocation} />
               <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() => handleInputChange('safetyDevices', option)}>
-                <Text style={styles.optionText}>{option}</Text>
-
-                <View
+                onPress={() =>onHandleLocationOpen()}
+                style={[
+                  styles.addressContainer,
+                  styles.shippingMethods,
+                  {
+                    backgroundColor: dark ? COLORS.dark3 : COLORS.white,
+                    borderRadius: 12,
+                  },
+                ]}>
+              <View style={styles.addressLeftContainer}>
+                <View style={styles.viewAddress}>
+                  <View style={styles.viewView}>
+                    <Text
+                      style={[
+                        styles.homeTitle,
+                        {
+                          color: dark ? COLORS.white : location ? COLORS.black : COLORS.grayscale700,
+                        },
+                      ]}>
+                      {location ? location : "Location"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={{marginRight: 10}}>
+                <Image
+                  source={icons.dropdownarrow}
+                  resizeMode="contain"
                   style={[
-                    styles.radioIcon,
+                    styles.arrowDropDownIcon,
                     {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                      tintColor: dark ? COLORS.white : COLORS.greyscale900,
+                    },
+                  ]}
+                />
+              </View>
+              </TouchableOpacity>
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Make
+              </Text>
+              <CustomRBSheetList ref={refRBMakeSheet} data={makeDataList} onSelectItem={onSelectMake} />
+              <TouchableOpacity
+                onPress={() =>onHandleMakeOpen()}
+                style={[
+                  styles.addressContainer,
+                  styles.shippingMethods,
+                  {
+                    backgroundColor: dark ? COLORS.dark3 : COLORS.white,
+                    borderRadius: 12,
+                  },
+                ]}>
+              <View style={styles.addressLeftContainer}>
+                <View style={styles.viewAddress}>
+                  <View style={styles.viewView}>
+                    <Text
+                      style={[
+                        styles.homeTitle,
+                        {
+                          color: dark ? COLORS.white : location ? COLORS.black : COLORS.grayscale700,
+                        },
+                      ]}>
+                      {makeData ? makeData : "Make"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={{marginRight: 10}}>
+                <Image
+                  source={icons.dropdownarrow}
+                  resizeMode="contain"
+                  style={[
+                    styles.arrowDropDownIcon,
+                    {
+                      tintColor: dark ? COLORS.white : COLORS.greyscale900,
+                    },
+                  ]}
+                />
+              </View>
+              </TouchableOpacity>
+             
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Model
+              </Text>
+              <TextInput
+                placeholder="Mr. John Doe"
+                placeholderTextColor={dark ? COLORS.white : COLORS.grayscale700}
+                style={[
+                  styles.codeFullInput,
+                  {
+                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                    backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                  },
+                ]}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Type
+              </Text>
+              <CustomRBSheetList ref={refRBTypeSheet} data={typeList} onSelectItem={onSelectType} />
+              <TouchableOpacity
+                onPress={() =>onHandleTypeOpen()}
+                style={[
+                  styles.addressContainer,
+                  styles.shippingMethods,
+                  {
+                    backgroundColor: dark ? COLORS.dark3 : COLORS.white,
+                    borderRadius: 12,
+                  },
+                ]}>
+              <View style={styles.addressLeftContainer}>
+                <View style={styles.viewAddress}>
+                  <View style={styles.viewView}>
+                    <Text
+                      style={[
+                        styles.homeTitle,
+                        {
+                          color: dark ? COLORS.white : location ? COLORS.black : COLORS.grayscale700,
+                        },
+                      ]}>
+                      {typeData ? typeData : "Type"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={{marginRight: 10}}>
+                <Image
+                  source={icons.dropdownarrow}
+                  resizeMode="contain"
+                  style={[
+                    styles.arrowDropDownIcon,
+                    {
+                      tintColor: dark ? COLORS.white : COLORS.greyscale900,
+                    },
+                  ]}
+                />
+              </View>
+              </TouchableOpacity>
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Serial Number
+              </Text>
+              <TextInput
+                placeholder="Mr. John Doe"
+                placeholderTextColor={dark ? COLORS.white : COLORS.grayscale700}
+                style={[
+                  styles.codeFullInput,
+                  {
+                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                    backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                  },
+                ]}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                GC Number
+              </Text>
+              <TextInput
+                placeholder="Mr. John Doe"
+                placeholderTextColor={dark ? COLORS.white : COLORS.grayscale700}
+                style={[
+                  styles.codeFullInput,
+                  {
+                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                    backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                  },
+                ]}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Flue Type
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Agent', value: 'apple'},
+                  {label: 'Lanlord', value: 'banana'},
+                  {label: 'Other', value: 'orange'},
+                  {label: 'Tenant', value: 'tenant'},
+                ]}
+                placeholder={{label: 'Make', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Operating Pressure (mbar) or Heat Input (KW/h) or (BTU/h)
+              </Text>
+              <TextInput
+                placeholder="Mr. John Doe"
+                placeholderTextColor={dark ? COLORS.white : COLORS.grayscale700}
+                style={[
+                  styles.codeFullInput,
+                  {
+                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                    backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                  },
+                ]}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Safety Devices
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Spillage Test
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Pass', value: 'apple'},
+                  {label: 'Fail', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Spillage Test', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Smoke Pellet Flue Flow Test
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Pass', value: 'apple'},
+                  {label: 'Fail', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{
+                  label: 'Smoke Pellet Flue Flow Test',
+                  value: null,
+                }}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Inital (low) Combustion Analyser Reading
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 12,
+              }}>
+              <View style={{width: (SIZES.width - 32) / 2 - 10}}>
+                <Text
+                  style={[
+                    commonStyles.inputHeader,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
                     },
                   ]}>
-                  {formData.safetyDevices != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Spillage Test Section */}
-        <View style={styles.simple_container}>
-          <Text style={styles.optiontitle}>Spillage Test</Text>
-          <View style={styles.optionContainer}>
-            {testOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() => handleInputChange('spillageTest', option)}>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
+                  Ratio
+                </Text>
+                <TextInput
+                  placeholder="Ratio"
+                  placeholderTextColor={
+                    dark ? COLORS.white : COLORS.grayscale700
+                  }
                   style={[
-                    styles.radioIcon,
+                    styles.codeDateInput,
                     {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                      backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                    },
+                  ]}
+                />
+                {/* <Input
+                  id="creditCardExpiryDate"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['creditCardExpiryDate']}
+                  placeholder="03 Oct 2025"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+              <View
+                style={{
+                  width: (SIZES.width - 32) / 2 - 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 30,
+                }}>
+                <ButtonFilled
+                  style={{width: '96%'}}
+                  onPress={() => {
+                    alert('Create Certificate');
+                    // navigation.navigate('SignatureScreen', {
+                    //   onSelect: (signature: any) => {
+                    //     setSignatureImage(signature);
+                    //   },
+                    //   titleData: 'Company Information',
+                    // });
+                  }}
+                  title={'Not Applicable'}
+                />
+                {/* <Input
+                  id="cvv"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['cvv']}
+                  placeholder="03 Oct 2026"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 12,
+              }}>
+              <View style={{width: (SIZES.width - 32) / 2 - 10}}>
+                <Text
+                  style={[
+                    commonStyles.inputHeader,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
                     },
                   ]}>
-                  {formData.spillageTest != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Smoke Pellet Flue Flow Test Section */}
-        <View style={styles.simple_container}>
-          <Text style={styles.optiontitle}>Smoke Pellet Flue Flow Test</Text>
-          <View style={styles.optionContainer}>
-            {testOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() => handleInputChange('smokePellet', option)}>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
+                  CO (PPM)
+                </Text>
+                <TextInput
+                  placeholder="CO (PPM)"
+                  placeholderTextColor={
+                    dark ? COLORS.white : COLORS.grayscale700
+                  }
                   style={[
-                    styles.radioIcon,
+                    styles.codeDateInput,
                     {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                      backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                    },
+                  ]}
+                />
+                {/* <Input
+                  id="creditCardExpiryDate"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['creditCardExpiryDate']}
+                  placeholder="03 Oct 2025"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+
+              <View
+                style={{
+                  width: (SIZES.width - 32) / 2 - 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 30,
+                }}>
+                <ButtonFilled
+                  style={{width: '96%'}}
+                  onPress={() => {
+                    alert('Create Certificate');
+                    // navigation.navigate('SignatureScreen', {
+                    //   onSelect: (signature: any) => {
+                    //     setSignatureImage(signature);
+                    //   },
+                    //   titleData: 'Company Information',
+                    // });
+                  }}
+                  title={'Not Applicable'}
+                />
+                {/* <Input
+                  id="cvv"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['cvv']}
+                  placeholder="03 Oct 2026"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 12,
+              }}>
+              <View style={{width: (SIZES.width - 32) / 2 - 10}}>
+                <Text
+                  style={[
+                    commonStyles.inputHeader,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
                     },
                   ]}>
-                  {formData.smokePellet != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Initial Combustion Analyser Readings */}
-        <Text style={styles.label}>
-          Initial (Low) Combustion Analyser Readings
-        </Text>
-        <View style={styles.rowContainer}>
-          <View style={styles.inputContainerRow}>
-            <Text style={styles.label}>RATIO</Text>
-            <TextInput
-              style={styles.valueInput}
-              value={formData.initalratio}
-              onChangeText={text => handleInputChange('initalratio', text)}
-              placeholder="Ratio"
-              placeholderTextColor="#888"
-            />
-
-            <TouchableOpacity
-              style={styles.naButton}
-              onPress={() => handleInputChange('initalratio', 'N/A')}>
-              <Text style={styles.naButtonText}>N/A</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputContainerRow}>
-            <Text style={styles.label}>CO (PPM)</Text>
-            <TextInput
-              style={styles.valueInput}
-              value={formData.initalco}
-              onChangeText={text => handleInputChange('initalco', text)}
-              placeholder="CO (PPM)"
-              placeholderTextColor="#888"
-            />
-
-            <TouchableOpacity
-              style={styles.naButton}
-              onPress={() => handleInputChange('initalco', 'N/A')}>
-              <Text style={styles.naButtonText}>N/A</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputContainerRow}>
-            <Text style={styles.label}>CO2 (%)</Text>
-            <TextInput
-              style={styles.valueInput}
-              value={formData.initalco2}
-              onChangeText={text => handleInputChange('initalco2', text)}
-              placeholder="CO2 (%)"
-              placeholderTextColor="#888"
-            />
-
-            <TouchableOpacity
-              style={styles.naButton}
-              onPress={() => handleInputChange('initalco2', 'N/A')}>
-              <Text style={styles.naButtonText}>N/A</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Final (high) Combustion Analyser Reading */}
-        <Text style={[styles.label, {marginTop: 10}]}>
-          Final (high) Combustion Analyser Reading
-        </Text>
-        <View style={styles.rowContainer}>
-          <View style={styles.inputContainerRow}>
-            <Text style={styles.label}>RATIO</Text>
-            <TextInput
-              style={styles.valueInput}
-              value={formData.finalratio}
-              onChangeText={text => handleInputChange('finalratio', text)}
-              placeholder="Ratio"
-              placeholderTextColor="#888"
-            />
-
-            <TouchableOpacity
-              style={styles.naButton}
-              onPress={() => handleInputChange('finalratio', 'N/A')}>
-              <Text style={styles.naButtonText}>N/A</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputContainerRow}>
-            <Text style={styles.label}>CO (PPM)</Text>
-            <TextInput
-              style={styles.valueInput}
-              value={formData.finalco}
-              onChangeText={text => handleInputChange('finalco', text)}
-              placeholder="CO (PPM)"
-              placeholderTextColor="#888"
-            />
-
-            <TouchableOpacity
-              style={styles.naButton}
-              onPress={() => handleInputChange('finalco', 'N/A')}>
-              <Text style={styles.naButtonText}>N/A</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputContainerRow}>
-            <Text style={styles.label}>CO2 (%)</Text>
-            <TextInput
-              style={styles.valueInput}
-              value={formData.finalco2}
-              onChangeText={text => handleInputChange('finalco2', text)}
-              placeholder="CO2 (%)"
-              placeholderTextColor="#888"
-            />
-
-            <TouchableOpacity
-              style={styles.naButton}
-              onPress={() => handleInputChange('finalco2', 'N/A')}>
-              <Text style={styles.naButtonText}>N/A</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Satisfactory Termination */}
-        <View style={[styles.simple_container, {marginTop: 8}]}>
-          <Text style={styles.optiontitle}>Satisfactory Termination</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() =>
-                  handleInputChange('satisfactoryTermination', option)
-                }>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
+                  CO2 (%)
+                </Text>
+                <TextInput
+                  placeholder="CO2 (%)"
+                  placeholderTextColor={
+                    dark ? COLORS.white : COLORS.grayscale700
+                  }
                   style={[
-                    styles.radioIcon,
+                    styles.codeDateInput,
                     {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                      backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                    },
+                  ]}
+                />
+                {/* <Input
+                  id="creditCardExpiryDate"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['creditCardExpiryDate']}
+                  placeholder="03 Oct 2025"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+
+              <View
+                style={{
+                  width: (SIZES.width - 32) / 2 - 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 30,
+                }}>
+                <ButtonFilled
+                  style={{width: '96%'}}
+                  onPress={() => {
+                    alert('Create Certificate');
+                    // navigation.navigate('SignatureScreen', {
+                    //   onSelect: (signature: any) => {
+                    //     setSignatureImage(signature);
+                    //   },
+                    //   titleData: 'Company Information',
+                    // });
+                  }}
+                  title={'Not Applicable'}
+                />
+                {/* <Input
+                  id="cvv"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['cvv']}
+                  placeholder="03 Oct 2026"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+            </View>
+
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Final (high) Combustion Analyser Reading
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 12,
+              }}>
+              <View style={{width: (SIZES.width - 32) / 2 - 10}}>
+                <Text
+                  style={[
+                    commonStyles.inputHeader,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
                     },
                   ]}>
-                  {formData.satisfactoryTermination != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        {/* Flue Visual Condition */}
-        <View style={[styles.simple_container]}>
-          <Text style={styles.optiontitle}>Flue Visual Condition</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() =>
-                  handleInputChange('flueVisualCondition', option)
-                }>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
+                  Ratio
+                </Text>
+                <TextInput
+                  placeholder="Ratio"
+                  placeholderTextColor={
+                    dark ? COLORS.white : COLORS.grayscale700
+                  }
                   style={[
-                    styles.radioIcon,
+                    styles.codeDateInput,
                     {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                      backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                    },
+                  ]}
+                />
+                {/* <Input
+                  id="creditCardExpiryDate"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['creditCardExpiryDate']}
+                  placeholder="03 Oct 2025"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+              <View
+                style={{
+                  width: (SIZES.width - 32) / 2 - 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 30,
+                }}>
+                <ButtonFilled
+                  style={{width: '96%'}}
+                  onPress={() => {
+                    alert('Create Certificate');
+                    // navigation.navigate('SignatureScreen', {
+                    //   onSelect: (signature: any) => {
+                    //     setSignatureImage(signature);
+                    //   },
+                    //   titleData: 'Company Information',
+                    // });
+                  }}
+                  title={'Not Applicable'}
+                />
+                {/* <Input
+                  id="cvv"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['cvv']}
+                  placeholder="03 Oct 2026"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 12,
+              }}>
+              <View style={{width: (SIZES.width - 32) / 2 - 10}}>
+                <Text
+                  style={[
+                    commonStyles.inputHeader,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
                     },
                   ]}>
-                  {formData.flueVisualCondition != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        {/* Adequate Ventilation */}
-        <View style={[styles.simple_container]}>
-          <Text style={styles.optiontitle}>Adequate Ventilation</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() =>
-                  handleInputChange('adequateVentilation', option)
-                }>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
+                  CO (PPM)
+                </Text>
+                <TextInput
+                  placeholder="CO (PPM)"
+                  placeholderTextColor={
+                    dark ? COLORS.white : COLORS.grayscale700
+                  }
                   style={[
-                    styles.radioIcon,
+                    styles.codeDateInput,
                     {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                      backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                    },
+                  ]}
+                />
+                {/* <Input
+                  id="creditCardExpiryDate"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['creditCardExpiryDate']}
+                  placeholder="03 Oct 2025"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+
+              <View
+                style={{
+                  width: (SIZES.width - 32) / 2 - 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 30,
+                }}>
+                <ButtonFilled
+                  style={{width: '96%'}}
+                  onPress={() => {
+                    alert('Create Certificate');
+                    // navigation.navigate('SignatureScreen', {
+                    //   onSelect: (signature: any) => {
+                    //     setSignatureImage(signature);
+                    //   },
+                    //   titleData: 'Company Information',
+                    // });
+                  }}
+                  title={'Not Applicable'}
+                />
+                {/* <Input
+                  id="cvv"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['cvv']}
+                  placeholder="03 Oct 2026"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 12,
+              }}>
+              <View style={{width: (SIZES.width - 32) / 2 - 10}}>
+                <Text
+                  style={[
+                    commonStyles.inputHeader,
+                    {
+                      color: dark ? COLORS.white : COLORS.black,
                     },
                   ]}>
-                  {formData.adequateVentilation != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        {/* Landlord's Appliance */}
-        <View style={[styles.simple_container]}>
-          <Text style={styles.optiontitle}>Landlord's Appliance</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() => handleInputChange('landlordAppliance', option)}>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
+                  CO2 (%)
+                </Text>
+                <TextInput
+                  placeholder="CO2 (%)"
+                  placeholderTextColor={
+                    dark ? COLORS.white : COLORS.grayscale700
+                  }
                   style={[
-                    styles.radioIcon,
+                    styles.codeDateInput,
                     {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                      color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                      backgroundColor: dark ? COLORS.dark2 : COLORS.white,
                     },
-                  ]}>
-                  {formData.landlordAppliance != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        {/* Inspected */}
-        <View style={[styles.simple_container]}>
-          <Text style={styles.optiontitle}>Inspected</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() => handleInputChange('inspected', option)}>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
-                  style={[
-                    styles.radioIcon,
-                    {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
+                  ]}
+                />
+                {/* <Input
+                  id="creditCardExpiryDate"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['creditCardExpiryDate']}
+                  placeholder="03 Oct 2025"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+
+              <View
+                style={{
+                  width: (SIZES.width - 32) / 2 - 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 30,
+                }}>
+                <ButtonFilled
+                  style={{width: '96%'}}
+                  onPress={() => {
+                    alert('Create Certificate');
+                    // navigation.navigate('SignatureScreen', {
+                    //   onSelect: (signature: any) => {
+                    //     setSignatureImage(signature);
+                    //   },
+                    //   titleData: 'Company Information',
+                    // });
+                  }}
+                  title={'Not Applicable'}
+                />
+                {/* <Input
+                  id="cvv"
+                  onInputChanged={inputChangedHandler}
+                  errorText={formState.inputValidities['cvv']}
+                  placeholder="03 Oct 2026"
+                  placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
+                /> */}
+              </View>
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Satisfactory Termination
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Flue Visual Condition
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Adequate Ventilation
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Landlord's Appliance
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Inspected
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Appliance Visual Check
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Appliance Serviced
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={{marginTop: 12}}>
+              <Text
+                style={[
+                  commonStyles.inputHeader,
+                  {
+                    color: dark ? COLORS.white : COLORS.black,
+                  },
+                ]}>
+                Appliance Safe to Use
+              </Text>
+              <RNPickerSelect
+                onValueChange={val => setRelationValue(val)}
+                value={relationValue}
+                items={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                placeholder={{label: 'Safety Devices', value: null}}
+                // useNativeAndroidPickerStyle={false} // important for custom styling
+                style={{
+                  inputAndroid: {
+                    paddingVertical: 0, // reduce vertical padding
+                    paddingHorizontal: 8,
+                    fontSize: 16,
+                    height: 52,
+                    backgroundColor: COLORS.white,
+                  },
+                  modalViewMiddle: {
+                    margin: 0,
+                    padding: 0,
+                    // backgroundColor:'gr'
+                  },
+                  modalViewTop: {
+                    margin: 0,
+                    padding: 0,
+                  },
+                  done: {color: 'blue'},
+                  placeholder: {color: '#999'},
+                }}
+              />
+            </View>
+            <View style={styles.signatureContainer}>
+                <ButtonFilled
+                  style={{width: '96%'}}
+                  onPress={() => {
+                    alert("Create Appliance")
+                  }}
+                  title={'Add Appliance'}
+                />
+                {/* <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  navigation.navigate('SignatureScreen', {
+                    onSelect: (signature: any) => {
+                      setSignatureImage(signature);
                     },
-                  ]}>
-                  {formData.inspected != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
+                    titleData: 'Company Information',
+                  });
+                }}>
+                <Text style={styles.buttonText}>Add Signature</Text>
+              </TouchableOpacity> */}
+            </View>
           </View>
-        </View>
-        {/* Appliance Visual Check */}
-        <View style={[styles.simple_container]}>
-          <Text style={styles.optiontitle}>Appliance Visual Check</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() =>
-                  handleInputChange('applianceVisualCheck', option)
-                }>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
-                  style={[
-                    styles.radioIcon,
-                    {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
-                    },
-                  ]}>
-                  {formData.applianceVisualCheck != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        {/* Appliance Serviced */}
-        <View style={[styles.simple_container]}>
-          <Text style={styles.optiontitle}>Appliance Serviced</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() => handleInputChange('applianceServiced', option)}>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
-                  style={[
-                    styles.radioIcon,
-                    {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
-                    },
-                  ]}>
-                  {formData.applianceServiced != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        {/* Appliance Safe to Use */}
-        <View style={[styles.simple_container]}>
-          <Text style={styles.optiontitle}>Appliance Safe to Use</Text>
-          <View style={styles.optionContainer}>
-            {booleanOptions.map(option => (
-              <TouchableOpacity
-                key={option}
-                style={styles.option}
-                onPress={() => handleInputChange('applianceSafeUse', option)}>
-                <Text style={styles.optionText}>{option}</Text>
-                <View
-                  style={[
-                    styles.radioIcon,
-                    {
-                      backgroundColor: Color.primaryBGColor,
-                      borderRadius: wp(4),
-                    },
-                  ]}>
-                  {formData.applianceSafeUse != option && (
-                    <View style={styles.radioIconS} />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        <View style={styles.csButtonA}>
-          
-          <TouchableOpacity onPress={() => handleSave()} style={[styles.csButton,{backgroundColor: Color.primaryBGColor,}]}>
-            <Text style={[styles.csBText,{color:'#FFF'}]}>Save</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  area: {
     flex: 1,
-    backgroundColor: Color.primaryBGColor,
-    // paddingTop: Platform.OS == 'android' ? StatusBar.currentHeight : null,
+    backgroundColor: COLORS.white,
   },
   container: {
-    backgroundColor: '#FFF',
-    padding: wp(3),
+    flex: 1,
+    backgroundColor: COLORS.white,
+    // paddingHorizontal: 16,
+    paddingTop: 16,
   },
-  title: {
-    color: '#2c3e50',
-    fontSize: hp(2.4),
+
+  sectionTitle: {
+    fontSize: hp(2.2),
     fontWeight: 'bold',
-    marginBottom: hp(2),
+    color: COLORS.black,
+    marginBottom: hp(1.5),
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.gray3,
+    paddingBottom: hp(0.5),
   },
-  inputContainer: {
-    marginBottom: hp(2),
+  inputGroup: {
+    marginTop: hp(2),
+    // marginBottom: hp(2),
+    justifyContent: 'center',
   },
   label: {
-    color: '#222',
-    fontSize: hp(2.1),
-    marginBottom: hp(1),
+    fontSize: hp(1.8),
+    color: COLORS.black,
+    marginBottom: hp(0.5),
   },
-  drop: {
-    color: '#7f8c8d',
-    fontSize: hp(2),
+  required: {
+    color: 'red',
   },
   input: {
-    backgroundColor: '#FFF',
-    borderRadius: 5,
-    padding: wp(2.2),
-    fontSize: hp(2),
-    height:hp(6),
-    color: '#2c3e50',
-    borderColor: '#e2e8f0',
+    height: hp(5.2),
     borderWidth: 1,
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    borderColor: COLORS.gray3,
+    borderRadius: wp(1),
+    paddingHorizontal: wp(3),
+    fontSize: hp(1.8),
+    backgroundColor: COLORS.white,
     elevation: 2,
   },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#FFF',
+  multilineInput: {
+    minHeight: hp(10),
+    textAlignVertical: 'top',
+  },
+  dropdown: {
+    height: hp(5.2),
+    borderWidth: 1,
+    borderColor: COLORS.gray3,
+    borderRadius: wp(1),
+    paddingHorizontal: wp(3),
+    backgroundColor: COLORS.white,
+    elevation: 2,
+  },
+  buttonContainer: {
+    // flexDirection: 'row',
+    // justifyContent: 'space-around',
+    marginTop: hp(2),
+  },
+  saveButton: {
+    backgroundColor: COLORS.primary,
+    height: hp(6),
+    borderRadius: wp(10),
+    marginBottom: hp(2),
     alignItems: 'center',
-    height: hp(100),
-    width: wp(100),
-    paddingBottom: 30,
+    justifyContent: 'center',
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    width: '90%',
-    maxHeight: '70%',
-    paddingBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    marginTop: 20,
+  saveButtonText: {
+    color: COLORS.white,
+    fontSize: hp(2.5),
+    fontWeight: 'bold',
+    marginLeft: wp(1),
   },
-  searchContainer: {
-    flexDirection: 'row',
+  cancelButton: {
+    backgroundColor: COLORS.white,
+    height: hp(6),
+    borderRadius: wp(10),
+    borderWidth: 1,
+    borderColor: COLORS.primary,
     alignItems: 'center',
-    paddingHorizontal: wp(2.5),
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingBottom: hp(0.5),
-    marginBottom: hp(1),
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: hp(1),
-    fontSize: hp(2),
-    color: '#222',
-  },
-  searchIcon: {
-    marginRight: wp(2.5),
-  },
-  closeButton: {
-    padding: wp(1.2),
-    marginRight: -wp(1.2),
-  },
-  item: {
-    backgroundColor: '#FFF',
-  },
-  itemText: {
-    padding: wp(4),
-    fontSize: hp(2),
-    color: '#222',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#ddd',
-  },
-  emptyText: {
-    padding: wp(4),
-    fontSize: hp(2),
-    color: '#888',
-    textAlign: 'center',
-  },
-  displayValue: {
-    marginTop: hp(1),
-    fontSize: hp(1.6),
-    color: '#555',
-  },
-  simple_container: {
-    backgroundColor: '#e2e8f0',
-    borderRadius: 8,
-    padding: wp(2),
+    justifyContent: 'center',
     marginBottom: hp(2),
   },
-  optiontitle: {
-    color: '#2c3e50',
-    fontSize: hp(1.8),
-    fontWeight: '700',
-    marginBottom: hp(2),
+  cancelButtonText: {
+    color: COLORS.black,
+    fontSize: hp(2.5),
+    fontWeight: 'bold',
+    marginLeft: wp(1),
   },
-  optionContainer: {
-    flexDirection: 'column',
+  errorText: {
+    fontSize: hp(1.4),
+    color: COLORS.error,
+    marginTop: hp(0.3),
   },
-  option: {
+  switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f9f9f9',
+    marginTop: hp(4),
+  },
+  switchPlaceholder: {
+    width: wp(10),
+    height: hp(4),
+    backgroundColor: '#ccc', // Placeholder for Switch
+    borderRadius: wp(2),
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  radioGroup: {
+    // flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+    borderWidth: 1,
+    paddingVertical: 10,
+    borderColor: '#F2F0EF',
+  },
+  radioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: wp(90),
+    justifyContent: 'space-between',
+    backgroundColor: '#FFF',
+    // borderWidth:1
+  },
+  radioOuter: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 6,
+  },
+  radioOuterActive: {
+    borderColor: '#008080',
+  },
+  radioInner: {
+    height: 10,
+    width: 10,
     borderRadius: 5,
-    padding: wp(3),
-    marginBottom: hp(1.5),
+    backgroundColor: '#008080',
+  },
+  radioLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  inputTextContainer: {
+    flexDirection: 'row',
+    borderColor: COLORS.greyscale500,
+    borderWidth: 1,
+    marginVertical: 5,
+    borderRadius: 12,
+    height: 75,
+    width: SIZES.width - 65,
+    alignItems: 'center',
+    // marginVertical: 10,
+    backgroundColor: COLORS.greyscale500,
+  },
+  textArea: {
+    height: 75, // control height
+    borderColor: '#ccc',
+    // borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    textAlignVertical: 'top', // important for Android
+    fontSize: 16,
+
+    color: COLORS.black,
+    flex: 1,
+    fontFamily: 'Urbanist Regular',
+    paddingTop: 0,
+    width: '90%',
+  },
+  selectedDateView: {
+    borderBottomColor: '#CBCBCB',
+    borderBottomWidth: 1,
+    padding: 10,
+    // marginLeft:10,
+  },
+  button: {
+    // marginVertical: 6,
+    // width: SIZES.width - 70,
+    // borderRadius: 30,
+    // position: 'absolute',
+    // bottom: 0, // distance from bottom
+    // left: 20,
+    // right: 20,
+    backgroundColor: '#007bff',
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '10%',
+    marginTop: '10%',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    borderColor: COLORS.greyscale500,
+    borderWidth: 1,
+    marginVertical: 5,
+    borderRadius: 16,
+    height: 52,
+    width: SIZES.width - 65,
+    alignItems: 'center',
+    backgroundColor: COLORS.greyscale500,
+  },
+  separateLine: {
+    width: '100%',
+    height: 1,
+    backgroundColor: COLORS.grayscale200,
+    marginVertical: 12,
+  },
+  summaryTitle: {
+    fontSize: 20,
+    fontFamily: 'Urbanist Bold',
+    color: COLORS.greyscale900,
+  },
+  addressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  addressLeftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  shippingMethods: {
+    backgroundColor: COLORS.white,
+    paddingVertical: 15,
+    // marginVertical: 10,
+  },
+  promoCodeContainer: {
+    width: SIZES.width - 32,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.white,
+    marginVertical: 12,
+  },
+  viewAddress: {
+    marginHorizontal: 16,
+  },
+  viewView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  homeTitle: {
+    fontSize: 16,
+    fontFamily: 'Urbanist Bold',
+    color: COLORS.greyscale900,
+  },
+  arrowRightIcon: {
+    height: 16,
+    width: 16,
+    tintColor: COLORS.greyscale900,
+  },
+  arrowDropDownIcon: {
+    marginRight:5,
+    height: 10,
+    width: 10,
+    tintColor: COLORS.greyscale900,
+  },
+  codeInput: {
+    width: SIZES.width - 112,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#FAFAFA',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+  },
+  codeDateInput: {
+    width: SIZES.width - 500,
+    height: 52,
+    // borderRadius: 16,
+    backgroundColor: '#FAFAFA',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+  },
+  codeFullInput: {
+    width: SIZES.width - 500,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#FAFAFA',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+  },
+  addPromoBtn: {
+    marginTop: 2,
+    height: 48,
+    width: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+  },
+  locationIcon: {
+    height: 20,
+    width: 20,
+    tintColor: COLORS.white,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  DropDownlabel: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  previewImage: {
+    width: '100%',
+    height: 150,
+    marginTop: 10,
+    resizeMode: 'contain',
     borderWidth: 1,
     borderColor: '#ddd',
   },
-  optionText: {
-    color: '#2c3e50',
-    fontSize: hp(2),
-  },
-  selectedOption: {
-    backgroundColor: '#e0f7fa',
-    borderColor: '#26a69a',
-  },
-  radioIcon: {
-    width: wp(6),
-    height: wp(6),
-    borderRadius: wp(4),
-    backgroundColor: '#26a69a',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioIconS: {
-    height: wp(4),
-    width: wp(4),
-    borderRadius: wp(2),
-    backgroundColor: 'white',
-  },
-  sectionTitle: {
-    color: '#2c3e50',
-    fontSize: hp(2),
-    fontWeight: 'bold',
-    marginTop: hp(2),
-    marginBottom: hp(1),
-  },
-  rowContainer: {
-    // flexDirection: 'row',
-    // justifyContent: 'space-between',
-    // marginBottom: hp(2),
-    alignItems: 'center',
-  },
-  inputContainerRow: {
-    width: wp(100),
-    alignItems: 'center',
-  },
-  valueInput: {
-    backgroundColor: '#FFF',
-
-    padding: wp(2.2),
-    fontSize: hp(1.7),
-    color: '#2c3e50',
-    borderColor: '#64758b',
-
-    width: wp(94),
+  signatureContainer: {
+    marginTop: 10,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0.5,
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 5,
-  },
-
-  naButton: {
-    backgroundColor: '#64758b',
-    borderBottomEndRadius: 5,
-    borderBottomStartRadius: 5,
-    paddingVertical: hp(1),
-    alignSelf: 'center',
-    width: wp(94),
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: '#64758b',
-    borderWidth: 1,
-    marginBottom: 5,
-  },
-  naButtonText: {
-    color: '#FFF',
-    fontSize: hp(1.6),
-  },
-  csButtonA: {
-    width: wp(94),
-    marginBottom:hp(4)
-  },
-  csButton: {
-    padding: wp(3),
-    width: wp(94),
-    alignItems: 'center',
-    justifyContent: 'center',
-    
-    marginBottom: hp(1),
-    borderWidth:0.5,
-    borderRadius:5,
-    borderColor:Color.primaryBGColor,
-  },
-  csBText: {
-    fontSize: hp(2),
-    fontWeight: '700',
-    color: Color.primaryBGColor,
   },
 });
 
-export default AddApplianceScreen;
+export default AddAppliance;

@@ -393,27 +393,27 @@ const CalendarScreen = () => {
                     customerName={item?.[0]?.customer?.full_name}
                     jobStatus={item?.[0]?.thestatus?.name}
                     JobAddress={
-                      item?.[0]?.customer?.address_line_1
+                      item?.[0]?.customer?.address?.address_line_1
                         ? `${capitalizeWords(
-                            item?.[0]?.customer?.address_line_1,
+                            item?.[0]?.customer?.address?.address_line_1,
                           )}${
-                            item?.[0]?.customer?.address_line_2
+                            item?.[0]?.customer?.address?.address_line_2
                               ? ', ' +
                                 capitalizeWords(
-                                  item?.[0]?.customer?.address_line_2,
+                                  item?.[0]?.customer?.address?.address_line_2,
                                 )
                               : ''
                           }${
-                            item?.[0]?.customer?.city
+                            item?.[0]?.customer?.address?.city
                               ? ', ' +
-                                capitalizeWords(item?.[0]?.customer?.city)
+                                capitalizeWords(item?.[0]?.customer?.address?.city)
                               : ''
                           }`
                         : 'N/A'
                     }
                     others={`${
-                      item?.[0]?.customer?.postal_code
-                        ?  item?.[0]?.customer?.postal_code
+                      item?.[0]?.customer?.address?.postal_code
+                        ?  item?.[0]?.customer?.address?.postal_code
                         : ''
                     }`}
                     amount={item?.[0]?.estimated_amount || 0.0}

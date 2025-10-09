@@ -361,6 +361,7 @@ const commissioning = require("../assets/icons/commissioning.png");
 const homeowner = require("../assets/icons/Homeowner.png");
 const breakdown = require("../assets/icons/breakdown.png");
 const appliance = require("../assets/icons/appliance.png");
+const dropdownarrow = require("../assets/icons/drop-down-arrow.png");
 
 
 
@@ -726,5 +727,6 @@ export default {
     warning,
     commissioning,
     breakdown,
-    appliance
+    appliance,
+    dropdownarrow
 }

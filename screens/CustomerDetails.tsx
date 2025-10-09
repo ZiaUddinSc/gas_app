@@ -36,13 +36,31 @@ type Nav = {
   navigate: (value: string) => void;
 };
 
+
+type Customer = {
+  id: string;
+  address:any
+  full_name:any
+  customer_full_name: string;
+  company_name: string;
+  address_line_1: string;
+  address_line_2: string;
+  full_address: string;
+  city: string;
+  postal_code: string;
+  contact: any;
+  number_of_job_address:any
+  number_of_jobs:any
+  note:any
+};
+
 const CustomerDetails = ({route}) => {
   const refRBSheet = useRef<any>(null);
   const {dark, colors, setScheme} = useTheme();
   // const { navigate } = useNavigation<Nav>();
   const navigation = useNavigation<NavigationProp<any>>();
   const [autoReminder, setAutoReminder] = useState<number>(1);
-  const [customer, setCustomer] = useState<any>(null);
+  const [customer, setCustomer] = useState<Customer>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const customerId = route?.params?.customerId;
@@ -202,12 +220,12 @@ const CustomerDetails = ({route}) => {
             <View style={styles.detailsRightContainer}>
               <AddressItem
                 onPress={() => {}}
-                address={`${capitalizeWords(customer?.address_line_1)}, ${
-                  customer?.address_line_2 !== null
-                    ? capitalizeWords(customer?.address_line_2) + ', '
+                address={`${capitalizeWords(customer?.address?.address_line_1)}, ${
+                  customer?.address?.address_line_2 !== null
+                    ? capitalizeWords(customer?.address?.address_line_2) + ', '
                     : ''
                 }`}
-                others={`${capitalizeWords(customer?.city)}, ${customer?.postal_code}`}
+                others={`${capitalizeWords(customer?.address?.city)}, ${customer?.address?.postal_code}`}
               />
             </View>
           </TouchableOpacity>
