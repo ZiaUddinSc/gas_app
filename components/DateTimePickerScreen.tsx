@@ -45,6 +45,7 @@ export default function DateTimePickerScreen({route}) {
   const [slot, setSlot] = useState<boolean>(false);
   const [seeAlll, setSeeAll] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(true);
+  const previousScreen = route?.params?.previousScreen
   const {dark} = useTheme();
 
   const KeywordItem: React.FC<KeywordItemProps> = ({
@@ -180,7 +181,7 @@ export default function DateTimePickerScreen({route}) {
     setSelectedTime(item?.start);
   };
   const handleConfirm = () => {
-    navigation.navigate('createnewjob', {
+    navigation.navigate(previousScreen ? previousScreen :'createnewjob', {
       ...route.params,
       selectedDate,
       selectedSlot,

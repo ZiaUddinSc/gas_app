@@ -29,6 +29,7 @@ import {getInitials,capitalizeWords} from '../helper/customMethods';
 
 type Customer = {
   id: string;
+  address:any,
   full_name: string;
   company_name: string;
   address_line_1: string;
@@ -55,6 +56,8 @@ const CustomerSelectScreen = ({route}) => {
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const previousScreen = route?.params?.previousScreen
+
   const [index, setIndex] = React.useState(0);
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
@@ -200,13 +203,13 @@ const CustomerSelectScreen = ({route}) => {
   };
   const selectCustomer = customer => {
     Keyboard.dismiss();
-    navigation.setParams({ customerId: customer?.id });
+    navigation.setParams({ customerId: customer?.id,selectedCustomer:customer });
     navigation.navigate('selectshippingaddress', {
+      ...route.params,
       customerId: customer?.id, 
       selectedCustomer: customer,
-      ...route.params,
       job:true,
-      navigateScreen: 'createnewjob'}) 
+      navigateScreen: previousScreen ? previousScreen: 'createnewjob'}) 
   };
 
   const handleSearch = (text: string) => {
@@ -278,17 +281,17 @@ const CustomerSelectScreen = ({route}) => {
                 ]}
               />
               <Text style={styles.status}>
-                {capitalizeWords(item.address_line_1)} {capitalizeWords(item.address_line_2)},{' '}
-                {capitalizeWords(item.city)}
+                {capitalizeWords(item?.address?.address_line_1)} {capitalizeWords(item?.address?.address_line_2)},{' '}
+                {capitalizeWords(item?.address?.city)}
                 {', '}
-                {item.postal_code}{' '}
+                {item?.address?.postal_code}{' '}
               </Text>
               {/* <Text style={styles.status}> </Text> */}
             </View>
           </View>
         </View>
         <View style={styles.callRightContainer}>
-          {item.contact && (item.contact.phone || item.contact.mobile) ? (
+          {item?.contact && (item?.contact.phone || item?.contact?.mobile) ? (
             <TouchableOpacity
               onPress={() => {
                 const numbers = [

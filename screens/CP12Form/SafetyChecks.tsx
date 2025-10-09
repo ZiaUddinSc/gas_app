@@ -38,9 +38,7 @@ import {useTheme} from '../../theme/ThemeProvider';
 import {COLORS, SIZES, FONTS, icons} from '../../constants';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../../components/Header';
-import {Dropdown} from 'react-native-element-dropdown';
-import Input from '../../components/Input';
-import {CustomerJobAddressStore} from '../../helper/CustomerHelper';
+import CustomDropdown from '../../components/CustomDropdown';
 const initialFormState = {
   inputValues: {
     name: '',
@@ -82,16 +80,13 @@ const sampleData = [
 
 const SafetyChecks = ({route}) => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const refRBSheet = useRef<any>(null);
   const customerId = route?.params?.customerId;
   const job = route?.params?.job || false;
   const {colors, dark} = useTheme();
   const [relationValue, setRelationValue] = useState(null);
   const [searchText, setSearchText] = useState('');
 
-  const onHandleSecurityOpen = () => {
-    refRBSheet.current.open()
-  }
+ 
 
   const navigateNewScreen = address => {
     navigation.navigate('createnewjob', {
@@ -130,19 +125,20 @@ const SafetyChecks = ({route}) => {
               Gas Installation Pipework
             </Text>
             
-            <View>
-              <TouchableOpacity onPress={()=>onHandleSecurityOpen()}>
-              <Text
-                style={[
-                  commonStyles.inputHeader,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-                Satisfactory Visual Inspection
-              </Text>
-              </TouchableOpacity>
-              <RNPickerSelect
+            <View style={styles.dropContainer}>
+              <CustomDropdown
+                data={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                value={relationValue}
+                onValueChange={setRelationValue}
+                placeholder="Select Satisfactory Visual Inspection"
+                label="Satisfactory Visual Inspection"
+                errorText="This field is required"
+              />
+              {/* <RNPickerSelect
                 onValueChange={val => setRelationValue(val)}
                 value={relationValue}
                 items={[
@@ -172,136 +168,51 @@ const SafetyChecks = ({route}) => {
                   done: {color: 'blue'},
                   placeholder: {color: '#999'},
                 }}
-              />
+              /> */}
             </View>
-            <View style={{marginTop: 12}}>
-              <Text
-                style={[
-                  commonStyles.inputHeader,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-                Emergency Control Accessible
-              </Text>
-              <RNPickerSelect
-                onValueChange={val => setRelationValue(val)}
-                value={relationValue}
-                items={[
+
+            <View style={styles.dropContainer}>
+              <CustomDropdown
+                data={[
                   {label: 'Yes', value: 'apple'},
                   {label: 'No', value: 'banana'},
                   {label: 'N/A', value: 'orange'},
                 ]}
-                placeholder={{label: 'Safety Devices', value: null}}
-                // useNativeAndroidPickerStyle={false} // important for custom styling
-                style={{
-                  inputAndroid: {
-                    paddingVertical: 0, // reduce vertical padding
-                    paddingHorizontal: 8,
-                    fontSize: 16,
-                    height: 52,
-                    backgroundColor: COLORS.white,
-                  },
-                  modalViewMiddle: {
-                    margin: 0,
-                    padding: 0,
-                    // backgroundColor:'gr'
-                  },
-                  modalViewTop: {
-                    margin: 0,
-                    padding: 0,
-                  },
-                  done: {color: 'blue'},
-                  placeholder: {color: '#999'},
-                }}
+                value={relationValue}
+                onValueChange={setRelationValue}
+                placeholder="Emergency Control Accessible"
+                label="Emergency Control Accessible"
+                errorText="This field is required"
               />
             </View>
-            <View style={{marginTop: 12}}>
-              <Text
-                style={[
-                  commonStyles.inputHeader,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-                Satisfactory Gas Tightness Test
-              </Text>
-              <RNPickerSelect
-                onValueChange={val => setRelationValue(val)}
-                value={relationValue}
-                items={[
+            <View style={styles.dropContainer}>
+              <CustomDropdown
+                data={[
                   {label: 'Yes', value: 'apple'},
                   {label: 'No', value: 'banana'},
                   {label: 'N/A', value: 'orange'},
                 ]}
-                placeholder={{label: 'Safety Devices', value: null}}
-                // useNativeAndroidPickerStyle={false} // important for custom styling
-                style={{
-                  inputAndroid: {
-                    paddingVertical: 0, // reduce vertical padding
-                    paddingHorizontal: 8,
-                    fontSize: 16,
-                    height: 52,
-                    backgroundColor: COLORS.white,
-                  },
-                  modalViewMiddle: {
-                    margin: 0,
-                    padding: 0,
-                    // backgroundColor:'gr'
-                  },
-                  modalViewTop: {
-                    margin: 0,
-                    padding: 0,
-                  },
-                  done: {color: 'blue'},
-                  placeholder: {color: '#999'},
-                }}
+                value={relationValue}
+                onValueChange={setRelationValue}
+                placeholder="Satisfactory Gas Tightness Test"
+                label="Satisfactory Gas Tightness Test"
+                errorText="This field is required"
               />
             </View>
-            <View style={{marginTop: 12}}>
-              <Text
-                style={[
-                  commonStyles.inputHeader,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-               Equipotential Bonding Satisfactory
-              </Text>
-              <RNPickerSelect
-                onValueChange={val => setRelationValue(val)}
-                value={relationValue}
-                items={[
+            <View style={styles.dropContainer}>
+              <CustomDropdown
+                data={[
                   {label: 'Yes', value: 'apple'},
                   {label: 'No', value: 'banana'},
                   {label: 'N/A', value: 'orange'},
                 ]}
-                placeholder={{label: 'Safety Devices', value: null}}
-                // useNativeAndroidPickerStyle={false} // important for custom styling
-                style={{
-                  inputAndroid: {
-                    paddingVertical: 0, // reduce vertical padding
-                    paddingHorizontal: 8,
-                    fontSize: 16,
-                    height: 52,
-                    backgroundColor: COLORS.white,
-                  },
-                  modalViewMiddle: {
-                    margin: 0,
-                    padding: 0,
-                    // backgroundColor:'gr'
-                  },
-                  modalViewTop: {
-                    margin: 0,
-                    padding: 0,
-                  },
-                  done: {color: 'blue'},
-                  placeholder: {color: '#999'},
-                }}
+                value={relationValue}
+                onValueChange={setRelationValue}
+                placeholder="Equipotential Bonding Satisfactory"
+                label="Equipotential Bonding Satisfactory"
+                errorText="This field is required"
               />
-            </View>
-           
-            
+            </View>  
           </View>
           <View
               style={[
@@ -325,92 +236,37 @@ const SafetyChecks = ({route}) => {
               ]}>
               Audible CO Alarms
             </Text>
+            <View style={styles.dropContainer}>
+              <CustomDropdown
+                data={[
+                  {label: 'Yes', value: 'apple'},
+                  {label: 'No', value: 'banana'},
+                  {label: 'N/A', value: 'orange'},
+                ]}
+                value={relationValue}
+                onValueChange={setRelationValue}
+                placeholder="Approved CO Alarm Fitted"
+                label="Approved CO Alarm Fitted"
+                errorText="This field is required"
+              />
+            </View>  
             
-            <View>
-              <Text
-                style={[
-                  commonStyles.inputHeader,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-                Approved CO Alarm Fitted
-              </Text>
-              <RNPickerSelect
-                onValueChange={val => setRelationValue(val)}
-                value={relationValue}
-                items={[
+            <View style={styles.dropContainer}>
+              <CustomDropdown
+                data={[
                   {label: 'Yes', value: 'apple'},
                   {label: 'No', value: 'banana'},
                   {label: 'N/A', value: 'orange'},
                 ]}
-                placeholder={{label: 'Safety Devices', value: null}}
-                // useNativeAndroidPickerStyle={false} // important for custom styling
-                style={{
-                  inputAndroid: {
-                    paddingVertical: 0, // reduce vertical padding
-                    paddingHorizontal: 8,
-                    fontSize: 16,
-                    height: 52,
-                    backgroundColor: COLORS.white,
-                  },
-                  modalViewMiddle: {
-                    margin: 0,
-                    padding: 0,
-                    // backgroundColor:'gr'
-                  },
-                  modalViewTop: {
-                    margin: 0,
-                    padding: 0,
-                  },
-                  done: {color: 'blue'},
-                  placeholder: {color: '#999'},
-                }}
-              />
-            </View>
-            <View style={{marginTop: 12}}>
-              <Text
-                style={[
-                  commonStyles.inputHeader,
-                  {
-                    color: dark ? COLORS.white : COLORS.black,
-                  },
-                ]}>
-                Emergency Control Accessible
-              </Text>
-              <RNPickerSelect
-                onValueChange={val => setRelationValue(val)}
                 value={relationValue}
-                items={[
-                  {label: 'Yes', value: 'apple'},
-                  {label: 'No', value: 'banana'},
-                  {label: 'N/A', value: 'orange'},
-                ]}
-                placeholder={{label: 'Safety Devices', value: null}}
-                // useNativeAndroidPickerStyle={false} // important for custom styling
-                style={{
-                  inputAndroid: {
-                    paddingVertical: 0, // reduce vertical padding
-                    paddingHorizontal: 8,
-                    fontSize: 16,
-                    height: 52,
-                    backgroundColor: COLORS.white,
-                  },
-                  modalViewMiddle: {
-                    margin: 0,
-                    padding: 0,
-                    // backgroundColor:'gr'
-                  },
-                  modalViewTop: {
-                    margin: 0,
-                    padding: 0,
-                  },
-                  done: {color: 'blue'},
-                  placeholder: {color: '#999'},
-                }}
+                onValueChange={setRelationValue}
+                placeholder="Are CO Alarm in Date"
+                label="Are CO Alarm in Date"
+                errorText="This field is required"
               />
-            </View>
-            <View style={{marginTop: 12}}>
+            </View>  
+
+            {/* <View style={{marginTop: 12}}>
               <Text
                 style={[
                   commonStyles.inputHeader,
@@ -451,7 +307,7 @@ const SafetyChecks = ({route}) => {
                   placeholder: {color: '#999'},
                 }}
               />
-            </View>
+            </View> */}
             <View style={{marginTop: 12}}>
               <Text
                 style={[
@@ -868,6 +724,10 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 5,
+  },
+  dropContainer: {
+    marginTop: 20,
+    backgroundColor: COLORS.white,
   },
   DropDownlabel: {
     position: 'absolute',

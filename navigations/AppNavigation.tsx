@@ -107,7 +107,8 @@ import {
   ProfileUpdate,
   AddAppliance,
   SafetyChecks,
-  Comments
+  Comments,
+  EditJob
 } from '../screens';
 import BottomTabNavigation from './BottomTabNavigation';
 
@@ -297,6 +298,7 @@ const AppNavigation = () => {
         <Stack.Screen name="addappliance" component={AddAppliance} />
         <Stack.Screen name="safetychecks" component={SafetyChecks} />
         <Stack.Screen name="comments" component={Comments} />
+        <Stack.Screen name="editjob" component={EditJob} />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>
