@@ -106,6 +106,9 @@ import EditRegisteredDetailsScreen from "../screens/EditRegisteredDetailsScreen"
 import NewCertificateList from "../screens/NewCertificateList";
 import CP12LandLord from "./CP12Form/CP12LandLord";
 import ProfileUpdate from "../screens/ProfileUpdate";
+import AddAppliance from "../screens/CP12Form/AddAppliance";
+import SafetyChecks from "../screens/CP12Form/SafetyChecks";
+import Comments from "../screens/CP12Form/Comments";
 export {
     AddNewAddress,
     AddNewCard,
@@ -213,5 +216,8 @@ export {
     EditRegisteredDetailsScreen,
     NewCertificateList,
     CP12LandLord,
-    ProfileUpdate
+    ProfileUpdate,
+    AddAppliance,
+    SafetyChecks,
+    Comments
 }

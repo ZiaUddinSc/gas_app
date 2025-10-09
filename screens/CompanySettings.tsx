@@ -63,9 +63,15 @@ interface Item {
   item: string;
   code: string;
 }
-
+interface CompanyTypeProps  {
+  id: string;
+  company:any
+};
 interface RenderItemProps {
   item: Item;
+}
+interface UserInfoProps {
+  id: string;
 }
 
 const CompanySettings = () => {
@@ -76,6 +82,7 @@ const CompanySettings = () => {
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [companyDetails, setCompanyDetails] = useState<CompanyTypeProps>();
   const [isVatRegisterEnabled, setIsVatRegisterEnabled] =
     useState<boolean>(companyDetails?.company?.vat_number !='' ? true : false);
   const [isDisplayCertificaterEnabled, setIsDisplayCertificaterEnabled] =
@@ -84,8 +91,7 @@ const CompanySettings = () => {
   const [selectedGender, setSelectedGender] = useState('');
   const {dark} = useTheme();
 
-  const [userInfo, setUserInfo] = useState();
-  const [companyDetails, setCompanyDetails] = useState({});
+  const [userInfo, setUserInfo] = useState<UserInfoProps>();
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -313,7 +319,7 @@ const CompanySettings = () => {
                 // navigation.navigate('editcustomer', {customerId: customerId});
 
                 navigation.navigate('editcompanyinfo', {
-                  company: companyDetails.company,
+                  company: companyDetails?.company,
                 });
               }}>
               <Text style={styles.dropdownText}>Company Information</Text>
@@ -324,7 +330,7 @@ const CompanySettings = () => {
               onPress={() => {
                 setShowDropdown(false);
                 navigation.navigate('editcompanyaddress', {
-                  company: companyDetails.company,
+                  company: companyDetails?.company,
                 });
               }}>
               <Text style={styles.dropdownText}>Compnay Address</Text>
@@ -334,7 +340,7 @@ const CompanySettings = () => {
               onPress={() => {
                 setShowDropdown(false);
                 navigation.navigate('editcontactdetails', {
-                  company: companyDetails.company,
+                  company: companyDetails?.company,
                 });
               }}>
               <Text style={styles.dropdownText}>Contact Details</Text>
@@ -344,7 +350,7 @@ const CompanySettings = () => {
               onPress={() => {
                 setShowDropdown(false);
                 navigation.navigate('editbankdetails', {
-                  company: companyDetails.company,
+                  company: companyDetails?.company,
                 });
               }}>
               <Text style={styles.dropdownText}>Bank Details</Text>
@@ -354,7 +360,7 @@ const CompanySettings = () => {
               onPress={() => {
                 setShowDropdown(false);
                 navigation.navigate('editregistereddetails', {
-                  company: companyDetails.company,
+                  company: companyDetails?.company,
                 });
               }}>
               <Text style={styles.dropdownText}>Registered Details</Text>
@@ -570,8 +576,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_phone
-                  ? companyDetails.company.company_phone
+                {companyDetails?.company?.company_phone
+                  ? companyDetails?.company?.company_phone
                   : 'N/A'}
               </Text>
             </View>
@@ -584,8 +590,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_email
-                  ? companyDetails.company.company_email
+                {companyDetails?.company?.company_email
+                  ? companyDetails?.company?.company_email
                   : 'N/A'}
               </Text>
             </View>
@@ -598,8 +604,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_web_site
-                  ? companyDetails.company.company_web_site
+                {companyDetails?.company?.company_web_site
+                  ? companyDetails?.company?.company_web_site
                   : 'N/A'}
               </Text>
             </View>
@@ -612,8 +618,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_tagline
-                  ? companyDetails.company.company_tagline
+                {companyDetails?.company?.company_tagline
+                  ? companyDetails?.company?.company_tagline
                   : 'N/A'}
               </Text>
             </View>
@@ -636,8 +642,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_bank_details.name_on_account
-                  ? companyDetails.company.company_bank_details.name_on_account
+                {companyDetails?.company?.company_bank_details?.name_on_account
+                  ? companyDetails?.company?.company_bank_details?.name_on_account
                   : 'N/A'}
               </Text>
             </View>
@@ -651,8 +657,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_bank_details.sort_code
-                  ? companyDetails.company.company_bank_details.sort_code
+                {companyDetails?.company?.company_bank_details?.sort_code
+                  ? companyDetails?.company?.company_bank_details?.sort_code
                   : 'N/A'}
               </Text>
             </View>
@@ -665,8 +671,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_bank_details.account_number
-                  ? companyDetails.company.company_bank_details.account_number
+                {companyDetails?.company?.company_bank_details?.account_number
+                  ? companyDetails?.company?.company_bank_details?.account_number
                   : 'N/A'}
               </Text>
             </View>
@@ -679,8 +685,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.company_bank_details.payment_term
-                  ? companyDetails.company.company_bank_details.payment_term
+                {companyDetails?.company?.company_bank_details?.payment_term
+                  ? companyDetails?.company?.company_bank_details?.payment_term
                   : 'N/A'}
               </Text>
             </View>
@@ -702,8 +708,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.gas_safe_registration_no
-                  ? companyDetails.company.gas_safe_registration_no
+                {companyDetails?.company?.gas_safe_registration_no
+                  ? companyDetails?.company?.gas_safe_registration_no
                   : 'N/A'}
               </Text>
             </View>
@@ -716,8 +722,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.registration_no
-                  ? companyDetails.company.registration_no
+                {companyDetails?.company?.registration_no
+                  ? companyDetails?.company?.registration_no
                   : 'N/A'}
               </Text>
             </View>
@@ -730,8 +736,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.register_body_id
-                  ? companyDetails.company.register_body_id
+                {companyDetails?.company?.register_body_id
+                  ? companyDetails?.company?.register_body_id
                   : 'N/A'}
               </Text>
             </View>
@@ -746,8 +752,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.registration_body_for_legionella
-                  ? companyDetails.company.registration_body_for_legionella
+                {companyDetails?.company?.registration_body_for_legionella
+                  ? companyDetails?.company?.registration_body_for_legionella
                   : 'N/A'}
               </Text>
             </View>
@@ -762,8 +768,8 @@ const CompanySettings = () => {
                     color: dark ? COLORS.white : COLORS.black,
                   },
                 ]}>
-                {companyDetails.company.registration_body_no_for_legionella
-                  ? companyDetails.company.registration_body_no_for_legionella
+                {companyDetails?.company?.registration_body_no_for_legionella
+                  ? companyDetails?.company?.registration_body_no_for_legionella
                   : 'N/A'}
               </Text>
             </View>

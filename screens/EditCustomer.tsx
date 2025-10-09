@@ -108,6 +108,7 @@ const EditCustomer = ({route}) => {
   const [message, setMessage] = useState("");
   const [modelOpen, setModelOpen] = useState(false);
   const [lookupAddress, setLookupAddress] = useState({
+    id:'',
     address_line_1: '',
     address_line_2: '',
     city: '',
@@ -230,6 +231,7 @@ const handlePhoneChange = (text) =>{
 
   const getFullAddress = customerAddress => {
     const {
+      id,
       address_line_1,
       address_line_2,
       city,
@@ -238,13 +240,14 @@ const handlePhoneChange = (text) =>{
       lat,
       long,
       country,
-    } = customerAddress;
+    } = customerAddress?.address;
 
     let newAddress = '';
     if (address_line_1 && address_line_2) {
       newAddress = `${address_line_1.trim()}, ${address_line_2.trim()}, ${city}, ${postal_code}`;
     }
     setLookupAddress({
+      id:id,
       address_line_1: address_line_1,
       address_line_2: address_line_2,
       city: city,
@@ -619,11 +622,13 @@ const handlePhoneChange = (text) =>{
                   : 'Address Lookup*'
               }
               onPress={() => {
+               
                 navigation.navigate('updateaddressscreen', {
                   initialValues: lookupAddress,
-                  customerId: customerId,
+                  // customerId: customerId, //It will be enabled if there is any issue
                   onSelectAddress: data => {
                     const updated = {
+                      id:data.id,
                       address_line_1: data.address_line_1,
                       address_line_2: data.address_line_2,
                       city: data.city,

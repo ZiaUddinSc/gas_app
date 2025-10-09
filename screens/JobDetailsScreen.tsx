@@ -10,9 +10,10 @@ import {
   Platform,
   Linking,
   Alert,
+  ImageSourcePropType
 } from 'react-native';
 import React, {useRef, useState, useEffect, useCallback} from 'react';
-import {ongoingJobs} from '../data';
+import ImageCard from '../components/ImageCard';
 import Header from '../components/Header';
 import {useTheme} from '../theme/ThemeProvider';
 import Button from '../components/Button';
@@ -27,7 +28,7 @@ import {
 import BoilerManualList from '../components/BoilerManualList';
 import LottieLoader from '../components/LottieLoader';
 import RBSheet from 'react-native-raw-bottom-sheet';
-
+import Card from '../components/Card';
 import {
   NavigationProp,
   useNavigation,
@@ -127,8 +128,9 @@ const JobDetailsScreen = ({route}) => {
 
   const renderWalletCard = () => {
     return (
-      <View style={styles.walletCardContainer}>
+      <ImageCard containerStyle={styles.walletCardContainer}>
         <View style={styles.topCardContainer}>
+          <Image source={images.logo} resizeMode="contain"  style={styles.icon}/>
           <View style={styles.topCardLeftContainer}></View>
           {/* <View>
                 <Text style={styles.cardNumber}>Fix leaking faucet in kitchen</Text>
@@ -180,8 +182,9 @@ const JobDetailsScreen = ({route}) => {
               </Text>
             </View>
           ) : null}
+         
         </View>
-      </View>
+      </ImageCard>
     );
   };
   if (loading) {
@@ -257,23 +260,23 @@ const JobDetailsScreen = ({route}) => {
                       ]}
                     />
                     <Text style={styles.status}>
-                      {jobData?.customer?.address_line_1
+                      {jobData?.customer?.address?.address_line_1
                         ? `${capitalizeWords(
-                            jobData?.customer?.address_line_1,
+                            jobData?.customer?.address?.address_line_1,
                           )}${
-                            jobData?.customer?.address_line_2
+                            jobData?.customer?.address?.address_line_2
                               ? ', ' +
                                 capitalizeWords(
-                                  jobData?.customer?.address_line_2,
+                                  jobData?.customer?.address?.address_line_2,
                                 )
                               : ''
                           }${
-                            jobData?.customer?.city
-                              ? ', ' + capitalizeWords(jobData?.customer?.city)
+                            jobData?.customer?.address?.city
+                              ? ', ' + capitalizeWords(jobData?.customer?.address?.city)
                               : ''
                           }${
-                            jobData?.customer?.postal_code
-                              ? ', ' + jobData?.customer?.postal_code
+                            jobData?.customer?.address?.postal_code
+                              ? ', ' + jobData?.customer?.address?.postal_code
                               : ''
                           }`
                         : 'N/A'}
@@ -853,6 +856,7 @@ const styles = StyleSheet.create({
     width: 130,
     borderRadius: 65,
   },
+  
   walletCardContainer: {
     width: SIZES.width - 32,
     borderRadius: 32,
@@ -866,6 +870,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
   },
+
   topCardLeftContainer: {
     marginTop: 6,
   },
@@ -915,6 +920,10 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontFamily: 'Urbanist Bold',
   },
+  icon: {
+    width: 40,
+    height: 24,
+},
   topupBtn: {
     width: 180,
     height: 42,

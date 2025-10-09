@@ -28,6 +28,7 @@ import {getInitials,capitalizeWords,removeZeroAndBracket,phoneNumberWithZero} fr
 
 type Customer = {
   id: string;
+  address:any
   full_name: string;
   company_name: string;
   address_line_1: string;
@@ -278,10 +279,10 @@ const Customers = () => {
                 ]}
               />
               <Text style={styles.status}>
-                {capitalizeWords(item.address_line_1)} {capitalizeWords(item.address_line_2)},{' '}
-                {capitalizeWords(item.city)}
+                {capitalizeWords(item?.address?.address_line_1)} {capitalizeWords(item?.address?.address_line_2)},{' '}
+                {capitalizeWords(item?.address?.city)}
                 {', '}
-                {item.postal_code}{' '}
+                {item?.address?.postal_code}{' '}
               </Text>
               {/* <Text style={styles.status}> </Text> */}
             </View>

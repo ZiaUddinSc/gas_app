@@ -80,10 +80,13 @@ interface UserInfo {
 interface PackageInfo {
   user?: any;
 }
+type SigantureProps = {
+  path: string;
+};
 
 const MyProfile = () => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const route = useRoute();
+  const route:any = useRoute();
   const [image, setImage] = useState<any>(null);
   const [error, setError] = useState();
   const [formState, dispatchFormState] = useReducer(reducer, initialState);
@@ -95,7 +98,7 @@ const MyProfile = () => {
   const {dark} = useTheme();
   const [userInfo, setUserInfo] = useState<UserInfo>({} as UserInfo);
   const [loading, setLoading] = useState(false);
-  const [signature, setSignature] = useState(); // for popup modal
+  const [signature, setSignature] = useState<SigantureProps>(); // for popup modal
   const [packageInfo, setPackageInfo] = useState<PackageInfo>(
     {} as PackageInfo,
   );

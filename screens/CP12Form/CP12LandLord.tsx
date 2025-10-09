@@ -213,15 +213,15 @@ const CP12LandLord = ({route}) => {
           <View style={{margin: 20}}>
             <View
               style={{
-                flexDirection: 'row',
+                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'space-between',
+                justifyContent: 'flex-end',
               }}>
-              <View style={styles.selectedDateView}>
+              {/* <View style={styles.selectedDateView}>
                 <Text style={{fontSize: 16, fontWeight: '700'}}>
                   {moment(selectedDate).format('ddd D  MMM YYYY')}
                 </Text>
-              </View>
+              </View> */}
               <View style={{width: 120}}>
                 <KeywordItem
                   item={{
@@ -442,7 +442,7 @@ const CP12LandLord = ({route}) => {
                 ]}
               />
               <TouchableOpacity
-                onPress={() => navigation.navigate('addpromo')}
+                onPress={() => navigation.navigate('addappliance')}
                 style={[
                   styles.addPromoBtn,
                   {
@@ -697,7 +697,7 @@ const CP12LandLord = ({route}) => {
                 ]}
               />
               <TouchableOpacity
-                onPress={() => navigation.navigate('addpromo')}
+                onPress={() => navigation.navigate('safetychecks')}
                 style={[
                   styles.addPromoBtn,
                   {
@@ -754,7 +754,7 @@ const CP12LandLord = ({route}) => {
                 ]}
               />
               <TouchableOpacity
-                onPress={() => navigation.navigate('addpromo')}
+                onPress={() => navigation.navigate('comments')}
                 style={[
                   styles.addPromoBtn,
                   {
@@ -886,21 +886,9 @@ const CP12LandLord = ({route}) => {
                   },
                 ]}
               />
-              {/* <Input
-                style={[
-                  {
-                    // color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
-                    backgroundColor:  COLORS.white,
-                  },
-                ]}
-                id="creditCardNumber"
-                onInputChanged={inputChangedHandler}
-                errorText={formState.inputValidities['creditCardNumber']}
-                placeholder="Mr. John Doe"
-                placeholderTextColor={dark ? COLORS.grayTie : COLORS.black}
-              /> */}
+    
             </View>
-            <View style={{marginTop: 12,backgroundColor:COLORS.white}}>
+            <View style={{marginTop: 12,backgroundColor:COLORS.greeen}}>
               {/* <Text style={[commonStyles.inputHeader, {
                       color: dark ? COLORS.white : COLORS.black
                   }]}>Relation</Text> */}
@@ -917,7 +905,7 @@ const CP12LandLord = ({route}) => {
                 // useNativeAndroidPickerStyle={false} // important for custom styling
                 style={{
                   inputAndroid: {
-                    
+                    borderRadius:16,
                     paddingVertical: 0, // reduce vertical padding
                     paddingHorizontal: 8,
                     fontSize: 16,
@@ -938,6 +926,63 @@ const CP12LandLord = ({route}) => {
                 }}
               />
             </View>
+            <View
+              style={[
+                styles.separateLine,
+                {
+                  backgroundColor: dark
+                    ? COLORS.grayscale700
+                    : COLORS.grayscale200,
+                  marginTop: 4,
+                  marginBottom: 16,
+                },
+              ]}
+            />
+            <Text
+              style={[
+                styles.summaryTitle,
+                {
+                  color: dark ? COLORS.white : COLORS.greyscale900,
+                },
+              ]}>
+              Customer Signature
+            </Text>
+            <View
+              style={[
+                styles.promoCodeContainer,
+                {
+                  backgroundColor: 'transparent',
+                },
+              ]}>
+              <TextInput
+                placeholder="Pending signature"
+                placeholderTextColor={dark ? COLORS.white : COLORS.grayscale700}
+                style={[
+                  styles.codeInput,
+                  {
+                    color: dark ? COLORS.secondaryWhite : COLORS.greyscale900,
+                    backgroundColor: dark ? COLORS.dark2 : COLORS.white,
+                  },
+                ]}
+              />
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('SignatureScreen', {
+                    onSelect: (signature: any) => {
+                      setSignatureImage(signature);
+                    },
+                    titleData: 'Company Information',
+                  });
+                }}
+                style={[
+                  styles.addPromoBtn,
+                  {
+                    backgroundColor: dark ? COLORS.dark3 : COLORS.primary,
+                  },
+                ]}>
+                <Feather name="plus" size={18} color={COLORS.white} />
+              </TouchableOpacity>
+            </View>
             <View>
               {signatureImage && (
                 <Image
@@ -950,14 +995,15 @@ const CP12LandLord = ({route}) => {
                 <ButtonFilled
                   style={{width: '96%'}}
                   onPress={() => {
-                    navigation.navigate('SignatureScreen', {
-                      onSelect: (signature: any) => {
-                        setSignatureImage(signature);
-                      },
-                      titleData: 'Company Information',
-                    });
+                    alert("Create Certificate")
+                    // navigation.navigate('SignatureScreen', {
+                    //   onSelect: (signature: any) => {
+                    //     setSignatureImage(signature);
+                    //   },
+                    //   titleData: 'Company Information',
+                    // });
                   }}
-                  title={signatureImage ? 'Update Signature' : 'Add Signature'}
+                  title={'Create Certificate'}
                 />
                 {/* <TouchableOpacity
                 style={styles.button}
@@ -1461,7 +1507,7 @@ const styles = StyleSheet.create({
   codeDateInput: {
     width: SIZES.width - 500,
     height: 52,
-    // borderRadius: 16,
+    borderRadius: 16,
     backgroundColor: '#FAFAFA',
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -1470,7 +1516,7 @@ const styles = StyleSheet.create({
   codeFullInput: {
     width: SIZES.width - 500,
     height: 52,
-    // borderRadius: 16,
+    borderRadius: 16,
     backgroundColor: '#FAFAFA',
     paddingHorizontal: 16,
     paddingVertical: 12,
