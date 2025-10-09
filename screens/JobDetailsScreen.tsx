@@ -69,6 +69,7 @@ const JobDetailsScreen = ({route}) => {
   const [loading, setLoading] = useState(false);
   const [customerCallInfo, setCustomerCallInfo] = useState<Customer>();
   const [invoice, setInvoice] = useState<number>(2);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const navigation = useNavigation<NavigationProp<any>>();
   const fetchDetails = async () => {
@@ -125,6 +126,57 @@ const JobDetailsScreen = ({route}) => {
       fetchDetails();
     }, []),
   );
+  const renderHeader = () => {
+    return (
+      <View>
+        <View style={styles.headerContainer}>
+          {/* Left side: Back button + Title */}
+          <TouchableOpacity
+            style={styles.headerLeft}
+            onPress={() => navigation.goBack()}>
+            <Image
+              source={icons.arrowLeft}
+              resizeMode="contain"
+              style={styles.logo}
+            />
+            <Text
+              style={[
+                styles.headerTitle,
+                {color: dark ? COLORS.white : COLORS.greyscale900},
+              ]}>
+              Job Details
+            </Text>
+          </TouchableOpacity>
+
+          {/* Right side: 3-dot menu */}
+          <TouchableOpacity onPress={() => setShowDropdown(prev => !prev)}>
+            <Image
+              source={icons.moreHorizontal}
+              resizeMode="contain"
+              style={[
+                styles.headerIcon,
+                {tintColor: dark ? COLORS.secondaryWhite : COLORS.greyscale900},
+              ]}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Dropdown */}
+        {showDropdown && (
+          <View style={styles.topdropdown}>
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                setShowDropdown(false);
+                navigation.navigate('editjob', {jobId: jobId,initialLoad:true});
+              }}>
+              <Text style={styles.dropdownText}>Edit</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
 
   const renderWalletCard = () => {
     return (
@@ -193,7 +245,7 @@ const JobDetailsScreen = ({route}) => {
   return (
     <SafeAreaView style={styles.area}>
       <View style={[styles.container]}>
-        <Header title="Job Details" />
+        {renderHeader()}
         <ScrollView showsVerticalScrollIndicator={false}>
           {renderWalletCard()}
           {jobData?.details ? (
@@ -622,6 +674,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Urbanist Bold',
     color: COLORS.greyscale900,
   },
+  headerIcon: {
+    height: 24,
+    width: 24,
+    tintColor: COLORS.greyscale900,
+  },
   statusContainer: {
     width: scaleByWidth(50),
     height: scaleByWidth(25),
@@ -862,6 +919,7 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     marginTop: 16,
     height: 230, //Height will be dynamic
+    // maxHeight:20,
     backgroundColor: COLORS.primary,
     padding: 16,
   },
@@ -900,12 +958,12 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   balanceText: {
-    fontSize: 18,
+    fontSize: scaleFont(18),
     color: COLORS.white,
     fontFamily: 'Urbanist Medium',
   },
   jobNameText: {
-    fontSize: 25,
+    fontSize: scaleFont(23),
     color: COLORS.white,
     fontFamily: 'Urbanist Medium',
   },
@@ -1056,6 +1114,48 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     tintColor: COLORS.black,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logo: {
+    height: 32,
+    width: 32,
+    tintColor: COLORS.primary,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: 'Urbanist Bold',
+    color: COLORS.greyscale900,
+    marginLeft: 12,
+  },
+
+  topdropdown: {
+    position: 'absolute',
+    top: 30, // just below header
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    elevation: 5, // shadow for Android
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    minWidth: 100,
+    zIndex: 1000,
+  },
+  dropdownItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 

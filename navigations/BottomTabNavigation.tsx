@@ -346,6 +346,7 @@ const BottomTabNavigation = () => {
         />
         {items?.map((item: any, index: number) => (
           <TouchableOpacity
+          key={index} // 👈 ADD THIS LINE
             onPress={()=>item?.navigateScreen ? 
               navigateNewScreen(item?.navigateScreen) :
               {} }

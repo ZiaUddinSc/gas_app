@@ -109,6 +109,8 @@ import ProfileUpdate from "../screens/ProfileUpdate";
 import AddAppliance from "../screens/CP12Form/AddAppliance";
 import SafetyChecks from "../screens/CP12Form/SafetyChecks";
 import Comments from "../screens/CP12Form/Comments";
+import EditJob from "../screens/EditJob";
+
 export {
     AddNewAddress,
     AddNewCard,
@@ -219,5 +221,6 @@ export {
     ProfileUpdate,
     AddAppliance,
     SafetyChecks,
-    Comments
+    Comments,
+    EditJob
 }

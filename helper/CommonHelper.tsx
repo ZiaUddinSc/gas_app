@@ -8,6 +8,7 @@ export const GetData = async (endPoint,search="") => {
     if(search){
       url =`${url}?search=${search}`
     }
+    console.log(`${Settings.baseUrl}${url}`)
     return await axios
       .get(`${Settings.baseUrl}${url}`, {
         headers: {

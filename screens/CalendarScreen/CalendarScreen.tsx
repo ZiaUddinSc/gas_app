@@ -68,7 +68,8 @@ const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
   );
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [calnedarJobs, setCalnedarJobs] = useState<any>([]);
+  const [dayWiseJobs, setdayWiseJobs] = useState<any>([]);
   const [year, month] = selectedDate.split('-').map(Number);
   const today = dayjs();
   const [baseDate, setBaseDate] = useState(today);
@@ -145,14 +146,16 @@ const CalendarScreen = () => {
           }
 
           agendaItems[dateKey].push({
-            id: job.id.toString(),
-            title: job.description || 'No Title',
-            customer: job.customer,
-            thestatus: job.thestatus,
-            estimated_amount: job.estimated_amount || 0.0,
+            id: job?.id.toString(),
+            title: job?.description || 'No Title',
+            customer: job?.customer,
+            thestatus: job?.thestatus,
+            estimated_amount: job?.estimated_amount || 0.0,
             time: job?.calendar.slot ? job.calendar.slot.start : '',
-            calendar: job.calendar,
+            calendar: job?.calendar,
           });
+          setCalnedarJobs(agendaItems);
+          // setSelectedDate(today.format('YYYY-MM-DD'));
         }
       });
     }
@@ -184,8 +187,8 @@ const CalendarScreen = () => {
   };
 
   const eventsForSelectedDate = React.useMemo(() => {
-    return agendaItems[selectedDate] || [];
-  }, [selectedDate, agendaItems]);
+    return calnedarJobs[selectedDate] || [];
+  }, [selectedDate, calnedarJobs]);
 
   type DateData = {
     day: number;
@@ -209,13 +212,13 @@ const CalendarScreen = () => {
     );
 
     if (weekIndex !== -1) {
-      setTimeout(() => {
-        flatListDatesRef.current?.scrollToIndex({
-          index: weekIndex,
-          animated: true,
-          viewPosition: 0.5,
-        });
-      }, 150);
+      // setTimeout(() => {
+      //   flatListDatesRef?.current?.scrollToIndex({
+      //     index: weekIndex,
+      //     animated: true,
+      //     viewPosition: 0.5,
+      //   });
+      // }, 150);
     }
   };
   const onDayPress = (day: DateData) => {
@@ -266,7 +269,8 @@ const CalendarScreen = () => {
       {item.map(date => {
         const isSelected = date === selectedDate;
         const day = dayjs(date);
-        const hasEvent = agendaItems[date] && agendaItems[date].length > 0;
+        const hasEvent =
+          calnedarJobs?.[date] && calnedarJobs?.[date]?.length > 0;
         return (
           <TouchableOpacity
             key={date}
@@ -376,9 +380,7 @@ const CalendarScreen = () => {
           <FlatList
             ref={scrollRef}
             style={{marginTop: 16}}
-            data={
-              eventsForSelectedDate.length > 0 ? [eventsForSelectedDate] : []
-            }
+            data={eventsForSelectedDate.length > 0 ? eventsForSelectedDate : []}
             keyExtractor={() => selectedDate} // only one row for the day
             renderItem={({item}) => {
               const eventDate = new Date(selectedDate);
@@ -388,40 +390,39 @@ const CalendarScreen = () => {
               return (
                 <>
                   <JobCard
-                    id={item?.[0]?.id}
-                    jobName={item?.[0]?.title}
-                    customerName={item?.[0]?.customer?.full_name}
-                    jobStatus={item?.[0]?.thestatus?.name}
+                    onPress={() =>
+                      navigation.navigate('jobdetailsscreen', {jobId: item?.id})
+                    }
+                    id={item?.id}
+                    jobName={item?.title}
+                    customerName={item?.customer?.full_name}
+                    jobStatus={item?.thestatus?.name}
                     JobAddress={
-                      item?.[0]?.customer?.address?.address_line_1
+                      item?.customer?.address?.address_line_1
                         ? `${capitalizeWords(
-                            item?.[0]?.customer?.address?.address_line_1,
+                            item?.customer?.address?.address_line_1,
                           )}${
-                            item?.[0]?.customer?.address?.address_line_2
+                            item?.customer?.address?.address_line_2
                               ? ', ' +
                                 capitalizeWords(
-                                  item?.[0]?.customer?.address?.address_line_2,
+                                  item?.customer?.address?.address_line_2,
                                 )
                               : ''
                           }${
-                            item?.[0]?.customer?.address?.city
+                            item?.customer?.address?.city
                               ? ', ' +
-                                capitalizeWords(item?.[0]?.customer?.address?.city)
+                                capitalizeWords(item?.customer?.address?.city)
                               : ''
                           }`
                         : 'N/A'
                     }
                     others={`${
-                      item?.[0]?.customer?.address?.postal_code
-                        ?  item?.[0]?.customer?.address?.postal_code
+                      item?.customer?.address?.postal_code
+                        ? item?.customer?.address?.postal_code
                         : ''
                     }`}
-                    amount={item?.[0]?.estimated_amount || 0.0}
-                    time={
-                      item?.[0]?.time
-                        ? convertTimetoTimeHour(item?.[0]?.time)
-                        : ''
-                    }
+                    amount={item?.estimated_amount || 0.0}
+                    time={item?.time ? convertTimetoTimeHour(item?.time) : ''}
                   />
                 </>
                 // <View style={styles.eventRow}>

@@ -40,8 +40,6 @@ import Header from '../../components/Header';
 import {Dropdown} from 'react-native-element-dropdown';
 import Input from '../../components/Input';
 import {CustomerJobAddressStore} from '../../helper/CustomerHelper';
-import CustomDropdown from '../../components/CustomDropdown';
-
 const initialFormState = {
   inputValues: {
     name: '',
@@ -70,13 +68,6 @@ interface KeywordItemProps {
   onPress: (id: string) => void;
   selected: boolean;
 }
-
-const data = [
-  {label: 'Agent', value: 'apple'},
-  {label: 'Lanlord', value: 'banana'},
-  {label: 'Other', value: 'orange'},
-  {label: 'Tenant', value: 'tenant'},
-];
 
 const CP12LandLord = ({route}) => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -207,17 +198,6 @@ const CP12LandLord = ({route}) => {
     }
   };
 
-  const renderLabel = () => {
-    if (relationValue || isFocus) {
-      return (
-        <Text style={[styles.label_new, isFocus && {color: COLORS.gray2}]}>
-          Relation
-        </Text>
-      );
-    }
-    return null;
-  };
-
   return (
     <SafeAreaView style={[styles.area, {backgroundColor: colors.background}]}>
       <View style={[styles.container, {backgroundColor: colors.background}]}>
@@ -233,7 +213,7 @@ const CP12LandLord = ({route}) => {
           <View style={{margin: 20}}>
             <View
               style={{
-                flexDirection: 'row',
+                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
               }}>
@@ -906,10 +886,12 @@ const CP12LandLord = ({route}) => {
                   },
                 ]}
               />
+    
             </View>
-            {/* <View style={styles.drop_container}>
-             
-                  {renderLabel()}
+            <View style={{marginTop: 12,backgroundColor:COLORS.greeen}}>
+              {/* <Text style={[commonStyles.inputHeader, {
+                      color: dark ? COLORS.white : COLORS.black
+                  }]}>Relation</Text> */}
               <RNPickerSelect
                 onValueChange={val => setRelationValue(val)}
                 value={relationValue}
@@ -942,17 +924,6 @@ const CP12LandLord = ({route}) => {
                   done: { color: 'blue' },
                   placeholder: { color: '#999' },
                 }}
-              />
-            </View> */}
-
-            <View style={styles.drop_container}>
-              <CustomDropdown
-                data={data}
-                value={relationValue}
-                onValueChange={setRelationValue}
-                placeholder="Select relation"
-                label="Relation"
-                errorText="This field is required"
               />
             </View>
             <View
@@ -1024,7 +995,7 @@ const CP12LandLord = ({route}) => {
                 <ButtonFilled
                   style={{width: '96%'}}
                   onPress={() => {
-                    alert('Create Certificate');
+                    alert("Create Certificate")
                     // navigation.navigate('SignatureScreen', {
                     //   onSelect: (signature: any) => {
                     //     setSignatureImage(signature);
@@ -1604,41 +1575,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  drop_container: {
-    marginTop: 20,
-    backgroundColor: COLORS.white,
-  },
-  dropdown_new: {
-    height: 50,
-    borderColor: COLORS.gray3,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-  },
-  label_new: {
-    position: 'absolute',
-    backgroundColor: 'white',
-    left: 22,
-    top: -10,
-    zIndex: 999,
-    paddingHorizontal: 2,
-    fontSize: 14,
-    borderRadius: 4,
-  },
-  placeholderStyle_new: {
-    fontSize: 16,
-  },
-  selectedTextStyle_new: {
-    fontSize: 16,
-  },
-  iconStyle_new: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle_new: {
-    height: 40,
-    fontSize: 16,
   },
 });
 
